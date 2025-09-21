@@ -12,6 +12,7 @@ import { MapPin, Droplets, Thermometer, Waves, Building, Wind } from 'lucide-rea
 import AQIGauge from '@/components/AQIGauge'
 import PollutionChart from '@/components/PollutionChart'
 import LandUseChart from '@/components/LandUseChart'
+import UrbanExpansionChart from '@/components/UrbanExpansionChart'
 import QuickStats from '@/components/QuickStats'
 
 const CityMap = dynamic(() => import('@/components/CityMap'), { 
@@ -118,16 +119,13 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
 
       <Separator className="mb-6" />
 
-      {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Left Column - Map */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1 }}
           className="lg:col-span-2 space-y-6"
         >
-          {/* 2D Map */}
           <Card className="h-[31.3rem]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center space-x-2">
@@ -135,32 +133,32 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                 <span>City Overview</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-2 h-[27.3rem]">
+            <CardContent className="p-6 h-[27.3rem]">
               <CityMap cityData={cityData} />
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="h-80">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="h-[27rem]">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center space-x-2">
                   <Wind className="h-5 w-5" />
                   <span>Pollution Trend</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="h-64">
+              <CardContent className="h-[23rem] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full">
                 <PollutionChart data={cityData.pollutionTrend} />
               </CardContent>
             </Card>
 
-            <Card className="h-80">
+            <Card className="h-[27rem]">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center space-x-2">
                   <Building className="h-5 w-5" />
                   <span>Land Use Distribution</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="h-64">
+              <CardContent className="h-[23rem] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full">
                 <LandUseChart data={cityData.landUse} />
               </CardContent>
             </Card>
@@ -173,88 +171,18 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
           transition={{ delay: 0.2 }}
           className="space-y-6"
         >
-          <Card>
+          <Card className="h-[31.3rem]">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Wind className="h-5 w-5" />
                 <span>Air Quality Index</span>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="h-[27.3rem] flex items-center justify-center">
               <AQIGauge value={cityData.aqi} level={getAQILevel(cityData.aqi)} />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Urban Health Metrics</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Droplets className="h-4 w-4 text-red-500" />
-                  <span className="text-sm">Pollution Level</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-red-500 rounded-full transition-all duration-500"
-                      style={{ width: `${cityData.stats.pollution}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-medium">{cityData.stats.pollution}%</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Thermometer className="h-4 w-4 text-orange-500" />
-                  <span className="text-sm">Heat Index</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-orange-500 rounded-full transition-all duration-500"
-                      style={{ width: `${cityData.stats.heat}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-medium">{cityData.stats.heat}%</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Waves className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm">Flood Risk</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                      style={{ width: `${cityData.stats.floodRisk}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-medium">{cityData.stats.floodRisk}%</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Building className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Land Use Efficiency</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-green-500 rounded-full transition-all duration-500"
-                      style={{ width: `${cityData.stats.landUse}%` }}
-                    />
-                  </div>
-                  <span className="text-sm font-medium">{cityData.stats.landUse}%</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
           <Card>
             <CardHeader>
@@ -266,6 +194,12 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                   <div className="text-2xl font-bold text-primary">+12.5%</div>
                   <div className="text-sm text-muted-foreground">Growth this year</div>
                 </div>
+                
+                {/* Chart */}
+                <div className="h-48 w-full">
+                  <UrbanExpansionChart data={cityData} />
+                </div>
+                
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="text-center p-3 bg-muted/20 rounded-lg">
                     <div className="font-semibold">Population</div>

@@ -106,28 +106,49 @@ export default function LandUseChart({ data }) {
   }, [data])
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center">
-      <svg ref={svgRef} className="max-w-full"></svg>
+    <div className="w-full h-full flex flex-col">
+      {/* Chart Section */}
+      <div className="flex-1 flex items-center justify-center mb-4">
+        <svg ref={svgRef} className="max-w-full max-h-full"></svg>
+      </div>
       
-      <div className="mt-2 grid grid-cols-2 gap-1 text-xs">
-        {Object.entries(data).map(([key, value], index) => {
-          const colors = [
-            "bg-chart-1",
-            "bg-chart-2", 
-            "bg-chart-3",
-            "bg-chart-4",
-            "bg-chart-5"
-          ]
-          
-          return (
-            <div key={key} className="flex items-center space-x-1">
-              <div className={`w-3 h-3 rounded-full ${colors[index % colors.length]} flex-shrink-0`}></div>
-              <span className="capitalize text-muted-foreground text-xs truncate">
-                {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-              </span>
-            </div>
-          )
-        })}
+      {/* Context Table Section */}
+      <div className="mt-2 flex-shrink-0">
+        <div className="text-sm text-muted-foreground mb-2">Land Use Distribution</div>
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="px-2 py-1 text-left font-medium">Category</th>
+                <th className="px-2 py-1 text-center font-medium">Percentage</th>
+                <th className="px-2 py-1 text-center font-medium">Color</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(data).map(([key, value], index) => {
+                const colors = [
+                  "bg-chart-1",
+                  "bg-chart-2", 
+                  "bg-chart-3",
+                  "bg-chart-4",
+                  "bg-chart-5"
+                ]
+                
+                const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')
+                
+                return (
+                  <tr key={key} className="border-b border-border">
+                    <td className="px-2 py-1 text-left">{label}</td>
+                    <td className="px-2 py-1 text-center font-medium">{value}%</td>
+                    <td className="px-2 py-1 text-center">
+                      <div className={`w-4 h-4 rounded-full ${colors[index % colors.length]} mx-auto`}></div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

@@ -114,8 +114,62 @@ export default function PollutionChart({ data }) {
   }, [data])
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <svg ref={svgRef} className="max-w-full max-h-full"></svg>
+    <div className="w-full h-full flex flex-col">
+      {/* Chart Section */}
+      <div className="flex-1 flex items-center justify-center mb-4">
+        <svg ref={svgRef} className="max-w-full max-h-full"></svg>
+      </div>
+      
+      {/* Context Table Section */}
+      <div className="mt-2 flex-shrink-0">
+        <div className="text-sm text-muted-foreground mb-2">Pollution Trend Analysis</div>
+        <div className="overflow-hidden rounded-lg border border-border">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className="px-2 py-1 text-left font-medium">Month</th>
+                <th className="px-2 py-1 text-center font-medium">AQI Value</th>
+                <th className="px-2 py-1 text-center font-medium">Status</th>
+                <th className="px-2 py-1 text-center font-medium">Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data && data.map((item, index) => {
+                const getStatus = (aqi) => {
+                  if (aqi <= 50) return { text: 'Good', color: 'text-green-500' }
+                  if (aqi <= 100) return { text: 'Moderate', color: 'text-yellow-500' }
+                  if (aqi <= 150) return { text: 'Unhealthy for Sensitive', color: 'text-orange-500' }
+                  if (aqi <= 200) return { text: 'Unhealthy', color: 'text-red-500' }
+                  return { text: 'Very Unhealthy', color: 'text-purple-500' }
+                }
+                
+                const getTrend = (index) => {
+                  if (index === 0) return { text: '—', color: 'text-muted-foreground' }
+                  const current = data[index].value
+                  const previous = data[index - 1].value
+                  const diff = current - previous
+                  if (diff > 0) return { text: '↗', color: 'text-red-500' }
+                  if (diff < 0) return { text: '↘', color: 'text-green-500' }
+                  return { text: '→', color: 'text-muted-foreground' }
+                }
+                
+                const status = getStatus(item.value)
+                const trend = getTrend(index)
+                const monthName = new Date(item.date + '-01').toLocaleDateString('en-US', { month: 'short' })
+                
+                return (
+                  <tr key={item.date} className="border-b border-border">
+                    <td className="px-2 py-1 text-left">{monthName}</td>
+                    <td className="px-2 py-1 text-center font-medium">{item.value}</td>
+                    <td className={`px-2 py-1 text-center ${status.color}`}>{status.text}</td>
+                    <td className={`px-2 py-1 text-center ${trend.color}`}>{trend.text}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   )
 }
