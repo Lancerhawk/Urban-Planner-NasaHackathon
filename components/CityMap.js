@@ -11,8 +11,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
-// Create realistic custom icons
-const createSensorIcon = (type, intensity) => {
+// Create NASA dataset icons
+const createNASADatasetIcon = (type, intensity, dataset) => {
   const colors = {
     pollution: intensity > 70 ? '#dc2626' : intensity > 40 ? '#f59e0b' : '#10b981',
     heat: intensity > 70 ? '#dc2626' : intensity > 40 ? '#f97316' : '#10b981',
@@ -20,13 +20,13 @@ const createSensorIcon = (type, intensity) => {
   }
   
   const icons = {
-    pollution: '🌫️',
+    pollution: '🛰️',
     heat: '🌡️',
     flood: '🌊'
   }
   
   return new L.divIcon({
-    className: 'sensor-marker',
+    className: 'nasa-dataset-marker',
     html: `
       <div style="
         background: linear-gradient(135deg, ${colors[type]}, ${colors[type]}dd);
@@ -109,31 +109,52 @@ export default function CityMap({ cityData }) {
   const [mapKey, setMapKey] = useState(0)
   const mapRef = useRef(null)
 
-  const generateRealisticSensorData = (center, type) => {
+  const generateNASADatasetPoints = (center, type) => {
     const points = []
     const [lat, lng] = center
     
-    // Generate realistic sensor locations based on city data
-    const sensorCount = type === 'pollution' ? 8 : type === 'heat' ? 6 : 5
-    const baseIntensity = cityData.stats[type === 'flood' ? 'floodRisk' : type] || 50
+    // NASA dataset configurations
+    const datasetConfig = {
+      pollution: {
+        count: 8,
+        datasets: ['TEMPO_NO2', 'MODIS_AOD', 'OMI_O3'],
+        baseIntensity: cityData.stats.pollution || 50
+      },
+      heat: {
+        count: 6,
+        datasets: ['MODIS_LST', 'Landsat_Thermal', 'ASTER_Temperature'],
+        baseIntensity: cityData.stats.heat || 50
+      },
+      flood: {
+        count: 5,
+        datasets: ['GPM_Precipitation', 'MODIS_Flood', 'SRTM_Elevation'],
+        baseIntensity: cityData.stats.floodRisk || 50
+      }
+    }
     
-    for (let i = 0; i < sensorCount; i++) {
+    const config = datasetConfig[type]
+    
+    for (let i = 0; i < config.count; i++) {
       // More realistic distribution patterns
-      const angle = (i / sensorCount) * 2 * Math.PI
+      const angle = (i / config.count) * 2 * Math.PI
       const distance = 0.02 + Math.random() * 0.08 // 2-10km radius
       const offsetLat = lat + Math.cos(angle) * distance
       const offsetLng = lng + Math.sin(angle) * distance
       
       // Realistic intensity variations
       const variation = (Math.random() - 0.5) * 30
-      const intensity = Math.max(10, Math.min(95, baseIntensity + variation))
+      const intensity = Math.max(10, Math.min(95, config.baseIntensity + variation))
+      
+      // Select random dataset for this point
+      const dataset = config.datasets[Math.floor(Math.random() * config.datasets.length)]
       
       points.push({
         id: `${type}-${i}`,
         position: [offsetLat, offsetLng],
         type,
         intensity: Math.round(intensity),
-        name: `${type.charAt(0).toUpperCase() + type.slice(1)} Sensor ${i + 1}`,
+        dataset: dataset,
+        name: `${dataset} Data Point ${i + 1}`,
         lastUpdate: new Date(Date.now() - Math.random() * 3600000).toISOString()
       })
     }
@@ -141,9 +162,9 @@ export default function CityMap({ cityData }) {
     return points
   }
 
-  const pollutionSensors = generateRealisticSensorData(cityData.coordinates, 'pollution')
-  const heatSensors = generateRealisticSensorData(cityData.coordinates, 'heat')
-  const floodSensors = generateRealisticSensorData(cityData.coordinates, 'flood')
+  const pollutionDataPoints = generateNASADatasetPoints(cityData.coordinates, 'pollution')
+  const heatDataPoints = generateNASADatasetPoints(cityData.coordinates, 'heat')
+  const floodDataPoints = generateNASADatasetPoints(cityData.coordinates, 'flood')
 
   useEffect(() => {
     return () => {
@@ -210,93 +231,99 @@ export default function CityMap({ cityData }) {
           </Popup>
         </Marker>
 
-        {/* Pollution Monitoring Zones */}
-        {pollutionSensors.map((sensor) => (
-          <div key={sensor.id}>
-            <Marker position={sensor.position} icon={createSensorIcon(sensor.type, sensor.intensity)}>
+        {/* NASA Air Quality Dataset Points */}
+        {pollutionDataPoints.map((dataPoint) => (
+          <div key={dataPoint.id}>
+            <Marker position={dataPoint.position} icon={createNASADatasetIcon(dataPoint.type, dataPoint.intensity, dataPoint.dataset)}>
               <Popup>
-                <div className="p-3 min-w-[180px]">
-                  <h4 className="font-bold text-sm mb-2">🌫️ {sensor.name}</h4>
+                <div className="p-3 min-w-[200px]">
+                  <h4 className="font-bold text-sm mb-2">🛰️ {dataPoint.name}</h4>
                   <div className="space-y-1">
-                    <p className="text-xs"><span className="font-semibold">Pollution Level:</span> {sensor.intensity}%</p>
+                    <p className="text-xs"><span className="font-semibold">NASA Dataset:</span> {dataPoint.dataset}</p>
+                    <p className="text-xs"><span className="font-semibold">Air Quality Index:</span> {dataPoint.intensity}%</p>
                     <p className="text-xs"><span className="font-semibold">Status:</span> 
-                      <span className={`ml-1 ${sensor.intensity > 70 ? 'text-red-600' : sensor.intensity > 40 ? 'text-yellow-600' : 'text-green-600'}`}>
-                        {sensor.intensity > 70 ? 'High Risk' : sensor.intensity > 40 ? 'Moderate' : 'Low Risk'}
+                      <span className={`ml-1 ${dataPoint.intensity > 70 ? 'text-red-600' : dataPoint.intensity > 40 ? 'text-yellow-600' : 'text-green-600'}`}>
+                        {dataPoint.intensity > 70 ? 'High Risk' : dataPoint.intensity > 40 ? 'Moderate' : 'Low Risk'}
                       </span>
                     </p>
-                    <p className="text-xs"><span className="font-semibold">Last Update:</span> {new Date(sensor.lastUpdate).toLocaleTimeString()}</p>
+                    <p className="text-xs"><span className="font-semibold">Data Source:</span> NASA Earthdata</p>
+                    <p className="text-xs"><span className="font-semibold">Last Update:</span> {new Date(dataPoint.lastUpdate).toLocaleTimeString()}</p>
                   </div>
                 </div>
               </Popup>
             </Marker>
             <Circle
-              center={sensor.position}
-              radius={getZoneRadius(sensor.intensity)}
-              fillColor={getZoneColor(sensor.type, sensor.intensity)}
-              fillOpacity={getZoneOpacity(sensor.intensity)}
-              color={getZoneColor(sensor.type, sensor.intensity)}
+              center={dataPoint.position}
+              radius={getZoneRadius(dataPoint.intensity)}
+              fillColor={getZoneColor(dataPoint.type, dataPoint.intensity)}
+              fillOpacity={getZoneOpacity(dataPoint.intensity)}
+              color={getZoneColor(dataPoint.type, dataPoint.intensity)}
               weight={2}
               opacity={0.8}
             />
           </div>
         ))}
 
-        {/* Heat Monitoring Zones */}
-        {heatSensors.map((sensor) => (
-          <div key={sensor.id}>
-            <Marker position={sensor.position} icon={createSensorIcon(sensor.type, sensor.intensity)}>
+        {/* NASA Urban Heat Island Dataset Points */}
+        {heatDataPoints.map((dataPoint) => (
+          <div key={dataPoint.id}>
+            <Marker position={dataPoint.position} icon={createNASADatasetIcon(dataPoint.type, dataPoint.intensity, dataPoint.dataset)}>
               <Popup>
-                <div className="p-3 min-w-[180px]">
-                  <h4 className="font-bold text-sm mb-2">🌡️ {sensor.name}</h4>
+                <div className="p-3 min-w-[200px]">
+                  <h4 className="font-bold text-sm mb-2">🌡️ {dataPoint.name}</h4>
                   <div className="space-y-1">
-                    <p className="text-xs"><span className="font-semibold">Heat Index:</span> {sensor.intensity}%</p>
+                    <p className="text-xs"><span className="font-semibold">NASA Dataset:</span> {dataPoint.dataset}</p>
+                    <p className="text-xs"><span className="font-semibold">Heat Index:</span> {dataPoint.intensity}%</p>
                     <p className="text-xs"><span className="font-semibold">Status:</span> 
-                      <span className={`ml-1 ${sensor.intensity > 70 ? 'text-red-600' : sensor.intensity > 40 ? 'text-orange-600' : 'text-green-600'}`}>
-                        {sensor.intensity > 70 ? 'Extreme Heat' : sensor.intensity > 40 ? 'Moderate' : 'Comfortable'}
+                      <span className={`ml-1 ${dataPoint.intensity > 70 ? 'text-red-600' : dataPoint.intensity > 40 ? 'text-orange-600' : 'text-green-600'}`}>
+                        {dataPoint.intensity > 70 ? 'Extreme Heat' : dataPoint.intensity > 40 ? 'Moderate' : 'Comfortable'}
                       </span>
                     </p>
-                    <p className="text-xs"><span className="font-semibold">Last Update:</span> {new Date(sensor.lastUpdate).toLocaleTimeString()}</p>
+                    <p className="text-xs"><span className="font-semibold">Data Source:</span> NASA Earthdata</p>
+                    <p className="text-xs"><span className="font-semibold">Last Update:</span> {new Date(dataPoint.lastUpdate).toLocaleTimeString()}</p>
                   </div>
                 </div>
               </Popup>
             </Marker>
             <Circle
-              center={sensor.position}
-              radius={getZoneRadius(sensor.intensity)}
-              fillColor={getZoneColor(sensor.type, sensor.intensity)}
-              fillOpacity={getZoneOpacity(sensor.intensity)}
-              color={getZoneColor(sensor.type, sensor.intensity)}
+              center={dataPoint.position}
+              radius={getZoneRadius(dataPoint.intensity)}
+              fillColor={getZoneColor(dataPoint.type, dataPoint.intensity)}
+              fillOpacity={getZoneOpacity(dataPoint.intensity)}
+              color={getZoneColor(dataPoint.type, dataPoint.intensity)}
               weight={2}
               opacity={0.8}
             />
           </div>
         ))}
 
-        {/* Flood Risk Zones */}
-        {floodSensors.map((sensor) => (
-          <div key={sensor.id}>
-            <Marker position={sensor.position} icon={createSensorIcon(sensor.type, sensor.intensity)}>
+        {/* NASA Flood Risk Dataset Points */}
+        {floodDataPoints.map((dataPoint) => (
+          <div key={dataPoint.id}>
+            <Marker position={dataPoint.position} icon={createNASADatasetIcon(dataPoint.type, dataPoint.intensity, dataPoint.dataset)}>
               <Popup>
-                <div className="p-3 min-w-[180px]">
-                  <h4 className="font-bold text-sm mb-2">🌊 {sensor.name}</h4>
+                <div className="p-3 min-w-[200px]">
+                  <h4 className="font-bold text-sm mb-2">🌊 {dataPoint.name}</h4>
                   <div className="space-y-1">
-                    <p className="text-xs"><span className="font-semibold">Flood Risk:</span> {sensor.intensity}%</p>
+                    <p className="text-xs"><span className="font-semibold">NASA Dataset:</span> {dataPoint.dataset}</p>
+                    <p className="text-xs"><span className="font-semibold">Flood Risk:</span> {dataPoint.intensity}%</p>
                     <p className="text-xs"><span className="font-semibold">Status:</span> 
-                      <span className={`ml-1 ${sensor.intensity > 70 ? 'text-red-600' : sensor.intensity > 40 ? 'text-blue-600' : 'text-green-600'}`}>
-                        {sensor.intensity > 70 ? 'High Risk' : sensor.intensity > 40 ? 'Moderate' : 'Low Risk'}
+                      <span className={`ml-1 ${dataPoint.intensity > 70 ? 'text-red-600' : dataPoint.intensity > 40 ? 'text-blue-600' : 'text-green-600'}`}>
+                        {dataPoint.intensity > 70 ? 'High Risk' : dataPoint.intensity > 40 ? 'Moderate' : 'Low Risk'}
                       </span>
                     </p>
-                    <p className="text-xs"><span className="font-semibold">Last Update:</span> {new Date(sensor.lastUpdate).toLocaleTimeString()}</p>
+                    <p className="text-xs"><span className="font-semibold">Data Source:</span> NASA Earthdata</p>
+                    <p className="text-xs"><span className="font-semibold">Last Update:</span> {new Date(dataPoint.lastUpdate).toLocaleTimeString()}</p>
                   </div>
                 </div>
               </Popup>
             </Marker>
             <Circle
-              center={sensor.position}
-              radius={getZoneRadius(sensor.intensity)}
-              fillColor={getZoneColor(sensor.type, sensor.intensity)}
-              fillOpacity={getZoneOpacity(sensor.intensity)}
-              color={getZoneColor(sensor.type, sensor.intensity)}
+              center={dataPoint.position}
+              radius={getZoneRadius(dataPoint.intensity)}
+              fillColor={getZoneColor(dataPoint.type, dataPoint.intensity)}
+              fillOpacity={getZoneOpacity(dataPoint.intensity)}
+              color={getZoneColor(dataPoint.type, dataPoint.intensity)}
               weight={2}
               opacity={0.8}
             />
