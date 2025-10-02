@@ -25,19 +25,19 @@ function RefreshTimer({ getTimeUntilNextRefresh, onRefresh, loading }) {
   if (!timeLeft) return null
 
   return (
-    <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-      <div className="flex items-center gap-1">
+    <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mb-3">
+      <div className="flex items-center gap-2 bg-muted/20 rounded-full px-3 py-1">
         <Clock className="h-3 w-3" />
-        <span>
+        <span className="tabular-nums">
           Next refresh: {timeLeft.minutes}m {timeLeft.seconds}s
         </span>
       </div>
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={onRefresh}
         disabled={loading}
-        className="h-6 px-2 text-xs"
+        className="h-7 px-3 text-[11px] rounded-full shadow-sm"
       >
         <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
         Refresh
@@ -190,7 +190,7 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden w-full">
       <div className="flex-shrink-0">
         <RefreshTimer 
           getTimeUntilNextRefresh={getTimeUntilNextRefresh}
@@ -199,11 +199,11 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
         />
       </div>
 
-      <div className="flex-shrink-0 flex items-center justify-center py-0">
+      <div className="flex-shrink-0 flex items-center justify-center py-0 w-full">
         <svg ref={svgRef}></svg>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full px-2 mt-0">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full px-3 md:px-4 mt-0 w-full">
         <div className="w-full space-y-3 pb-4">
         <div className="text-center">
           <Badge 
@@ -216,7 +216,7 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
             {currentAQILevel}
           </Badge>
           <div className="text-xs text-muted-foreground">
-            Based on {validDays} days of NASA satellite data
+            Based on {totalDays} days of NASA satellite data
           </div>
         </div>
 
@@ -254,7 +254,7 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
         </div>
 
         {/* AQI Reference Table */}
-        <div className="overflow-hidden rounded-lg border border-border">
+        <div className="overflow-hidden rounded-lg border border-border mx-0">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border bg-muted/50">

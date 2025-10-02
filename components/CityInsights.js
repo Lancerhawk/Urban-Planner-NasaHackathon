@@ -135,7 +135,10 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
           transition={{ delay: 0.1 }}
           className="lg:col-span-2 space-y-6"
         >
-          <Card className="h-[31.3rem]">
+          <Card className="h-[31.3rem] relative">
+            <div className="absolute top-2 right-2 z-10">
+              <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
+            </div>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center space-x-2">
                 <MapPin className="h-5 w-5" />
@@ -148,7 +151,14 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
           </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="h-[27rem]">
+            <Card className="h-[27rem] relative">
+              <div className="absolute top-2 right-2 z-10">
+                {cityData.name === 'New York' ? (
+                  <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px]">Real data</Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
+                )}
+              </div>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center space-x-2">
                   <Wind className="h-5 w-5" />
@@ -164,7 +174,10 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
               </CardContent>
             </Card>
 
-            <Card className="h-[27rem]">
+            <Card className="h-[27rem] relative">
+              <div className="absolute top-2 right-2 z-10">
+                <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
+              </div>
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center space-x-2">
                   <Building className="h-5 w-5" />
@@ -184,14 +197,21 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
           transition={{ delay: 0.2 }}
           className="space-y-6"
         >
-          <Card className="h-[31.3rem]">
+          <Card className="h-[31.3rem] relative">
+            <div className="absolute top-2 right-2 z-10">
+              {cityData.name === 'New York' ? (
+                <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px]">Real data</Badge>
+              ) : (
+                <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
+              )}
+            </div>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Wind className="h-5 w-5" />
                 <span>Air Quality Index</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-[27.3rem] flex items-center justify-center">
+            <CardContent className="h-[27.3rem] flex items-center justify-center px-2 pb-3 pt-0">
               {cityData.name === 'New York' ? (
                 <NASAAQIGauge city="nyc" />
               ) : (
@@ -201,7 +221,10 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
           </Card>
 
 
-          <Card>
+          <Card className="relative">
+            <div className="absolute top-2 right-2 z-10">
+              <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
+            </div>
             <CardHeader>
               <CardTitle>Urban Expansion</CardTitle>
             </CardHeader>

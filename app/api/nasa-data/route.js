@@ -80,7 +80,7 @@ async function processNASAData(city = 'nyc') {
       throw new Error('Failed to process NASA GeoTIFF data')
     }
     
-    const { data: gdalData, validFiles, totalFiles, errorFiles } = gdalResult
+    const { data: gdalData, validFiles, totalFiles, errorFiles, errors: errorSamples } = gdalResult
     
     if (validFiles === 0) {
       throw new Error('No valid AOD data found in any GeoTIFF files')
@@ -135,6 +135,7 @@ async function processNASAData(city = 'nyc') {
       totalDays: totalFiles,
       validDays: dailyData.length,
       errorDays: errorFiles,
+      errorSamples: (errorSamples || []).slice(0, 10),
       dataRange: {
         start: dailyData[0]?.date,
         end: dailyData[dailyData.length - 1]?.date

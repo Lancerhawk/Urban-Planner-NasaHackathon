@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, ArrowRight, Globe, Building2 } from 'lucide-react'
+import { MapPin, ArrowRight, Globe, Building2, Loader2 } from 'lucide-react'
+import { useNASAData } from '@/hooks/use-nasa-data'
 
 const AVAILABLE_CITIES = {
   'India': {
@@ -104,16 +105,47 @@ const getAQITextColor = (aqi) => {
 export default function CitySelector({ onCitySelect }) {
   const [selectedCountry, setSelectedCountry] = useState(null)
   const [hoveredCity, setHoveredCity] = useState(null)
+  const [cityData, setCityData] = useState(AVAILABLE_CITIES)
+  
+  // Use NASA data for New York
+  const { data: nasaData, loading: nasaLoading, error: nasaError } = useNASAData('nyc', false)
+
+  // Update city data with NASA data when available
+  useEffect(() => {
+    if (nasaData && nasaData.currentAQI) {
+      setCityData(prevData => ({
+        ...prevData,
+        'United States': {
+          ...prevData['United States'],
+          'New York': {
+            ...prevData['United States']['New York'],
+            aqi: nasaData.currentAQI,
+            aqiLevel: nasaData.currentAQILevel,
+            description: `Global city with NASA satellite data available (${nasaData.totalDays} days processed)`,
+            stats: {
+              ...prevData['United States']['New York'].stats,
+              pollution: Math.min(100, Math.round((nasaData.currentAQI / 200) * 100)), // Convert AQI to percentage
+            },
+            nasaData: {
+              totalDays: nasaData.totalDays,
+              validDays: nasaData.validDays,
+              dataRange: nasaData.dataRange,
+              lastUpdated: nasaData.lastUpdated
+            }
+          }
+        }
+      }))
+    }
+  }, [nasaData])
 
   const handleCitySelect = (country, city) => {
-    const cityData = AVAILABLE_CITIES[country][city]
-    onCitySelect(country, city, cityData)
+    const selectedCityData = cityData[country][city]
+    onCitySelect(country, city, selectedCityData)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-6xl">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -144,7 +176,7 @@ export default function CitySelector({ onCitySelect }) {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
           >
-            {Object.keys(AVAILABLE_CITIES).map((country, index) => (
+            {Object.keys(cityData).map((country, index) => (
               <motion.div
                 key={country}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
@@ -166,10 +198,10 @@ export default function CitySelector({ onCitySelect }) {
                   <CardContent>
                     <div className="text-center">
                       <p className="text-muted-foreground mb-4">
-                        {Object.keys(AVAILABLE_CITIES[country]).length} cities available
+                        {Object.keys(cityData[country]).length} cities available
                       </p>
                       <div className="flex flex-wrap justify-center gap-2">
-                        {Object.keys(AVAILABLE_CITIES[country]).map((city) => (
+                        {Object.keys(cityData[country]).map((city) => (
                           <Badge key={city} variant="secondary" className="text-xs">
                             {city}
                           </Badge>
@@ -208,7 +240,7 @@ export default function CitySelector({ onCitySelect }) {
 
             {/* Cities Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Object.entries(AVAILABLE_CITIES[selectedCountry]).map(([cityName, cityData], index) => (
+              {Object.entries(cityData[selectedCountry]).map(([cityName, currentCityData], index) => (
                 <motion.div
                   key={cityName}
                   initial={{ opacity: 0, y: 20 }}
@@ -223,56 +255,95 @@ export default function CitySelector({ onCitySelect }) {
                     className="cursor-pointer hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50 relative overflow-hidden"
                     onClick={() => handleCitySelect(selectedCountry, cityName)}
                   >
-                    {cityData.hasNASAData && (
-                      <div className="absolute top-3 right-3">
-                        <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs">
-                          🛰️ NASA Data
-                        </Badge>
-                      </div>
-                    )}
-                    
                     <CardHeader className="pb-3">
                       <CardTitle className="text-xl flex items-center justify-between">
-                        <span>{cityData.name}</span>
-                        <Badge 
-                          className={`${getAQIColor(cityData.aqi)} text-white px-2 py-1 text-xs`}
-                        >
-                          AQI {cityData.aqi}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <span>{currentCityData.name}</span>
+                          {currentCityData.hasNASAData && (
+                            <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs">
+                              🛰️ NASA Data
+                              {nasaLoading && cityName === 'New York' && (
+                                <Loader2 className="h-3 w-3 ml-1 animate-spin" />
+                              )}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge 
+                            className={`${getAQIColor(currentCityData.aqi)} text-white px-2 py-1 text-xs`}
+                          >
+                            AQI {currentCityData.aqi}
+                            {nasaLoading && cityName === 'New York' && (
+                              <Loader2 className="h-3 w-3 ml-1 animate-spin" />
+                            )}
+                          </Badge>
+                          {cityName !== 'New York' && (
+                            <Badge variant="secondary" className="text-[10px] px-1 py-0">
+                              Static
+                            </Badge>
+                          )}
+                        </div>
                       </CardTitle>
                       <p className="text-sm text-muted-foreground">
-                        {cityData.description}
+                        {currentCityData.description}
                       </p>
+                      {cityName === 'New York' && nasaError && (
+                        <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded mt-2">
+                          Using fallback data - NASA service unavailable
+                        </div>
+                      )}
+                      {cityName === 'New York' && currentCityData.nasaData && (
+                        <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2">
+                          Real-time NASA data: {currentCityData.nasaData.totalDays} days processed
+                        </div>
+                      )}
                     </CardHeader>
                     
                     <CardContent className="space-y-4">
                       {/* AQI Status */}
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Air Quality</span>
-                        <span className={`text-sm font-semibold ${getAQITextColor(cityData.aqi)}`}>
-                          {cityData.aqiLevel}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${getAQITextColor(currentCityData.aqi)}`}>
+                            {currentCityData.aqiLevel}
+                          </span>
+                          {cityName !== 'New York' && (
+                            <Badge variant="outline" className="text-[10px] px-1 py-0">
+                              Demo
+                            </Badge>
+                          )}
+                        </div>
                       </div>
 
                       {/* Quick Stats */}
-                      <div className="grid grid-cols-2 gap-3 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Pollution</span>
-                          <span className="font-medium">{cityData.stats.pollution}%</span>
+                      {cityName === 'New York' ? (
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Pollution</span>
+                            <span className="font-medium">{currentCityData.stats.pollution}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Heat</span>
+                            <span className="font-medium">{currentCityData.stats.heat}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Flood Risk</span>
+                            <span className="font-medium">{currentCityData.stats.floodRisk}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Land Use</span>
+                            <span className="font-medium">{currentCityData.stats.landUse}%</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Heat</span>
-                          <span className="font-medium">{cityData.stats.heat}%</span>
+                      ) : (
+                        <div className="text-center py-4">
+                          <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg border-dashed border">
+                            📊 Static demo data
+                            <br />
+                            <span className="text-[10px]">Real-time metrics coming soon</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Flood Risk</span>
-                          <span className="font-medium">{cityData.stats.floodRisk}%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Land Use</span>
-                          <span className="font-medium">{cityData.stats.landUse}%</span>
-                        </div>
-                      </div>
+                      )}
 
                       {/* Select Button */}
                       <motion.div
@@ -286,7 +357,7 @@ export default function CitySelector({ onCitySelect }) {
                           className="w-full mt-4 flex items-center justify-center gap-2"
                           size="sm"
                         >
-                          Explore {cityData.name}
+                          Explore {currentCityData.name}
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </motion.div>
