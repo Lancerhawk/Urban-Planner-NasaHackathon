@@ -10,7 +10,9 @@ import { Separator } from '@/components/ui/saparator'
 import { MapPin, Droplets, Thermometer, Waves, Building, Wind } from 'lucide-react'
 
 import AQIGauge from '@/components/AQIGauge'
+import NASAAQIGauge from '@/components/NASAAQIGauge'
 import PollutionChart from '@/components/PollutionChart'
+import NASAPollutionChart from '@/components/NASAPollutionChart'
 import LandUseChart from '@/components/LandUseChart'
 import UrbanExpansionChart from '@/components/UrbanExpansionChart'
 import QuickStats from '@/components/QuickStats'
@@ -72,12 +74,19 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
             </div>
             <div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                <h1 className="text-3xl font-bold">{cityData.name}</h1>
-                <Badge 
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold">{cityData.name}</h1>
+                  {cityData.name === 'New York' && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                      🛰️ NASA Data Available
+                    </Badge>
+                  )}
+                </div>
+                {/* <Badge 
                   className={`${getAQIColor(cityData.aqi)} text-white px-3 py-1 text-sm font-semibold flex-shrink-0`}
                 >
                   AQI {cityData.aqi} - {getAQILevel(cityData.aqi)}
-                </Badge>
+                </Badge> */}
               </div>
               <p className="text-muted-foreground text-lg">{cityData.country}</p>
             </div>
@@ -147,7 +156,11 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                 </CardTitle>
               </CardHeader>
               <CardContent className="h-[23rem] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full">
-                <PollutionChart data={cityData.pollutionTrend} />
+                {cityData.name === 'New York' ? (
+                  <NASAPollutionChart city="nyc" />
+                ) : (
+                  <PollutionChart data={cityData.pollutionTrend} />
+                )}
               </CardContent>
             </Card>
 
@@ -179,7 +192,11 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
               </CardTitle>
             </CardHeader>
             <CardContent className="h-[27.3rem] flex items-center justify-center">
-              <AQIGauge value={cityData.aqi} level={getAQILevel(cityData.aqi)} />
+              {cityData.name === 'New York' ? (
+                <NASAAQIGauge city="nyc" />
+              ) : (
+                <AQIGauge value={cityData.aqi} level={getAQILevel(cityData.aqi)} />
+              )}
             </CardContent>
           </Card>
 

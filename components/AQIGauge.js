@@ -109,9 +109,12 @@ export default function AQIGauge({ value, level }) {
   }, [value, level])
 
   return (
-    <div className="flex flex-col items-center">
-      <svg ref={svgRef}></svg>
-      <div className="mt-0 text-center">
+    <div className="flex flex-col items-center h-full overflow-hidden">
+      <div className="flex-shrink-0">
+        <svg ref={svgRef}></svg>
+      </div>
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full px-2">
+        <div className="mt-0 text-center pb-4">
         <div className="text-sm text-muted-foreground mb-3">Air Quality Index</div>
         <div className="overflow-hidden rounded-lg border border-border">
           <table className="w-full text-xs">
@@ -160,6 +163,7 @@ export default function AQIGauge({ value, level }) {
               </tr>
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>

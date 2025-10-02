@@ -12,7 +12,8 @@ import {
   Activity,
   Target,
   Menu,
-  X
+  X,
+  MapPin
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -34,7 +35,16 @@ const sidebarItems = [
   }
 ]
 
-export default function Sidebar({ activeView, setActiveView, sidebarOpen, setSidebarOpen }) {
+const sidebarActions = [
+  {
+    id: 'change-city',
+    label: 'Change City',
+    icon: MapPin,
+    description: 'Select a different city'
+  }
+]
+
+export default function Sidebar({ activeView, setActiveView, sidebarOpen, setSidebarOpen, onChangeCity }) {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -126,6 +136,39 @@ export default function Sidebar({ activeView, setActiveView, sidebarOpen, setSid
                     <div className="flex flex-col items-start min-w-0 flex-1">
                       <span className="font-medium text-sm truncate w-full">{item.label}</span>
                       <span className="text-xs opacity-60 truncate w-full">{item.description}</span>
+                    </div>
+                  </Button>
+                </motion.div>
+              )
+            })}
+            
+            {/* Separator */}
+            <div className="border-t border-sidebar-border my-4"></div>
+            
+            {/* Action Items */}
+            {sidebarActions.map((action) => {
+              const IconComponent = action.icon
+              
+              return (
+                <motion.div
+                  key={action.id}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start h-12 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    onClick={() => {
+                      if (action.id === 'change-city' && onChangeCity) {
+                        onChangeCity()
+                      }
+                      setSidebarOpen(false) // Close sidebar on mobile after selection
+                    }}
+                  >
+                    <IconComponent className="h-5 w-5 mr-3 flex-shrink-0" />
+                    <div className="flex flex-col items-start min-w-0 flex-1">
+                      <span className="font-medium text-sm truncate w-full">{action.label}</span>
+                      <span className="text-xs opacity-60 truncate w-full">{action.description}</span>
                     </div>
                   </Button>
                 </motion.div>
@@ -229,6 +272,40 @@ export default function Sidebar({ activeView, setActiveView, sidebarOpen, setSid
                   <div className="flex flex-col items-start min-w-0 flex-1">
                     <span className="font-medium text-sm truncate w-full">{item.label}</span>
                     <span className="text-xs opacity-60 truncate w-full">{item.description}</span>
+                  </div>
+                )}
+              </Button>
+            </motion.div>
+          )
+        })}
+        
+        {/* Separator */}
+        {sidebarOpen && <div className="border-t border-sidebar-border my-4"></div>}
+        
+        {/* Action Items */}
+        {sidebarActions.map((action) => {
+          const IconComponent = action.icon
+          
+          return (
+            <motion.div
+              key={action.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                variant="ghost"
+                className={`w-full justify-start h-12 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${!sidebarOpen && 'px-3'}`}
+                onClick={() => {
+                  if (action.id === 'change-city' && onChangeCity) {
+                    onChangeCity()
+                  }
+                }}
+              >
+                <IconComponent className={`h-5 w-5 ${sidebarOpen ? 'mr-3' : ''} flex-shrink-0`} />
+                {sidebarOpen && (
+                  <div className="flex flex-col items-start min-w-0 flex-1">
+                    <span className="font-medium text-sm truncate w-full">{action.label}</span>
+                    <span className="text-xs opacity-60 truncate w-full">{action.description}</span>
                   </div>
                 )}
               </Button>

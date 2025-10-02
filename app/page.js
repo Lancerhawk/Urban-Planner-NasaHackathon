@@ -9,6 +9,8 @@ import Sidebar from '@/components/Sidebar'
 import CityInsights from '@/components/CityInsights'
 import FutureVision from '@/components/FutureVision'
 import UrbanBenchmarking from '@/components/UrbanBenchmarking'
+import CitySelector from '@/components/CitySelector'
+import { getSelectedCity, setSelectedCity as saveSelectedCity, hasSelectedCity } from '@/lib/cookies'
 
 const MOCK_CITIES = {
   'India': {
@@ -159,10 +161,12 @@ const MOCK_CITIES = {
 
 export default function App() {
   const [activeView, setActiveView] = useState('insights')
-  const [selectedCountry, setSelectedCountry] = useState('India')
-  const [selectedCity, setSelectedCity] = useState('Mumbai')
+  const [selectedCountry, setSelectedCountry] = useState(null)
+  const [selectedCity, setSelectedCity] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [showCitySelector, setShowCitySelector] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -173,6 +177,37 @@ export default function App() {
     window.addEventListener('resize', checkScreenSize)
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
+
+  // Check for saved city selection on mount
+  useEffect(() => {
+    const savedCity = getSelectedCity()
+    if (savedCity) {
+      setSelectedCountry(savedCity.country)
+      setSelectedCity(savedCity.city)
+      setShowCitySelector(false)
+    }
+    setIsLoading(false)
+  }, [])
+
+  // Handle city selection from CitySelector
+  const handleCitySelect = (country, city, cityData) => {
+    setSelectedCountry(country)
+    setSelectedCity(city)
+    saveSelectedCity(country, city) // Save to cookies
+    setShowCitySelector(false)
+  }
+
+  // Handle city change from navbar (update cookies)
+  const handleCityChange = (country, city) => {
+    setSelectedCountry(country)
+    setSelectedCity(city)
+    saveSelectedCity(country, city) // Update cookies
+  }
+
+  // Handle change city from sidebar
+  const handleChangeCity = () => {
+    setShowCitySelector(true)
+  }
 
   const currentCityData = MOCK_CITIES[selectedCountry]?.[selectedCity]
 
@@ -185,10 +220,7 @@ export default function App() {
             cities={MOCK_CITIES}
             selectedCountry={selectedCountry}
             selectedCity={selectedCity}
-            onCityChange={(country, city) => {
-              setSelectedCountry(country)
-              setSelectedCity(city)
-            }}
+            onCityChange={handleCityChange}
           />
         )
       case 'future':
@@ -200,6 +232,23 @@ export default function App() {
     }
   }
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading Urban Planner...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show city selector if no city is selected
+  if (showCitySelector) {
+    return <CitySelector onCitySelect={handleCitySelect} />
+  }
+
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
       <Sidebar 
@@ -207,6 +256,7 @@ export default function App() {
         setActiveView={setActiveView}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
+        onChangeCity={handleChangeCity}
       />
       
       {isMobile && !sidebarOpen && (
