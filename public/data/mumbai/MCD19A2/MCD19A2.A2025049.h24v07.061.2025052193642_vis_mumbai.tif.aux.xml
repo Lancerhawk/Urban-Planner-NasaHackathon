@@ -1,0 +1,34 @@
+<PAMDataset>
+  <PAMRasterBand band="1">
+    <Description>AOD at 0.47 micron</Description>
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">600</MDI>
+      <MDI key="STATISTICS_MEAN">422.12792166772</MDI>
+      <MDI key="STATISTICS_MINIMUM">110</MDI>
+      <MDI key="STATISTICS_STDDEV">57.132072034876</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">95.59</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="2">
+    <Description>AOD at 0.47 micron</Description>
+    <Metadata>
+      <MDI key="STATISTICS_VALID_PERCENT">0</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="3">
+    <Description>AOD at 0.47 micron</Description>
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">696</MDI>
+      <MDI key="STATISTICS_MEAN">382.76019722098</MDI>
+      <MDI key="STATISTICS_MINIMUM">69</MDI>
+      <MDI key="STATISTICS_STDDEV">76.996797437033</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">67.36</MDI>
+    </Metadata>
+  </PAMRasterBand>
+  <PAMRasterBand band="4">
+    <Description>AOD at 0.47 micron</Description>
+    <Metadata>
+      <MDI key="STATISTICS_VALID_PERCENT">0</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

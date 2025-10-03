@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Area, Legend } from 'recharts'
 import { useNASAData } from '@/hooks/use-nasa-data'
 import { Badge } from '@/components/ui/badge'
@@ -79,6 +79,33 @@ export default function NASAPollutionChart({ city = 'nyc' }) {
         return { ...d, aqi_ma7: Math.round(avg), dateMs }
       })
     : []
+
+  // Stats for currently visible range
+  const visibleStats = useMemo(() => {
+    if (!smoothedTrend || smoothedTrend.length === 0) return null
+    const [minDomain, maxDomain] = xDomain ?? [
+      smoothedTrend[0].dateMs,
+      smoothedTrend[smoothedTrend.length - 1].dateMs
+    ]
+    const inView = smoothedTrend.filter(d => d.dateMs >= minDomain && d.dateMs <= maxDomain)
+    if (inView.length === 0) return null
+    // Find min and max with their dates
+    let minItem = inView[0]
+    let maxItem = inView[0]
+    for (let i = 1; i < inView.length; i++) {
+      if (inView[i].aqi < minItem.aqi) minItem = inView[i]
+      if (inView[i].aqi > maxItem.aqi) maxItem = inView[i]
+    }
+    const aqiValues = inView.map(d => d.aqi)
+    const averageAQI = Math.round(aqiValues.reduce((s, v) => s + v, 0) / aqiValues.length)
+    return { 
+      minAQI: minItem.aqi, 
+      minDate: minItem.dateMs ?? new Date(minItem.date).getTime(),
+      maxAQI: maxItem.aqi, 
+      maxDate: maxItem.dateMs ?? new Date(maxItem.date).getTime(),
+      averageAQI 
+    }
+  }, [smoothedTrend, xDomain])
 
   useEffect(() => {
     if (!smoothedTrend || smoothedTrend.length === 0) return
@@ -290,19 +317,19 @@ export default function NASAPollutionChart({ city = 'nyc' }) {
       </div>
       {/* Helper caption removed per request */}
 
-      {/* Footer Stats */}
+      {/* Visible-range statistics derived from the data shown in the chart */}
       <div className="mt-4 grid grid-cols-3 gap-4 text-center text-xs">
         <div className="p-2 bg-muted/20 rounded">
-          <div className="font-semibold text-green-600">{statistics?.minAQI || 'N/A'}</div>
-          <div className="text-muted-foreground">Best Day</div>
+          <div className="font-semibold text-green-600">AQI {visibleStats?.minAQI ?? statistics?.minAQI ?? 'N/A'}</div>
+          <div className="text-muted-foreground">Best Day{visibleStats?.minDate ? ` • ${new Date(visibleStats.minDate).toLocaleDateString()}` : ''}</div>
         </div>
         <div className="p-2 bg-muted/20 rounded">
-          <div className="font-semibold text-blue-600">{statistics?.averageAQI || 'N/A'}</div>
-          <div className="text-muted-foreground">Average</div>
+          <div className="font-semibold text-blue-600">AQI {visibleStats?.averageAQI ?? statistics?.averageAQI ?? 'N/A'}</div>
+          <div className="text-muted-foreground">Average (range)</div>
         </div>
         <div className="p-2 bg-muted/20 rounded">
-          <div className="font-semibold text-red-600">{statistics?.maxAQI || 'N/A'}</div>
-          <div className="text-muted-foreground">Worst Day</div>
+          <div className="font-semibold text-red-600">AQI {visibleStats?.maxAQI ?? statistics?.maxAQI ?? 'N/A'}</div>
+          <div className="text-muted-foreground">Worst Day{visibleStats?.maxDate ? ` • ${new Date(visibleStats.maxDate).toLocaleDateString()}` : ''}</div>
         </div>
       </div>
 

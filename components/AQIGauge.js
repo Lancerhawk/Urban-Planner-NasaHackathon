@@ -31,17 +31,14 @@ export default function AQIGauge({ value, level }) {
       { min: 301, max: 500, color: "#7c2d12", label: "Hazardous" }
     ]
 
-    // Create arc generator
     const arc = d3.arc()
       .innerRadius(radius - 30)
       .outerRadius(radius)
 
-    // Create angle scale
     const angleScale = d3.scaleLinear()
       .domain([0, 300])
       .range([-Math.PI / 2, Math.PI / 2])
 
-    // Draw background arc
     g.append("path")
       .datum({ 
         startAngle: -Math.PI / 2, 
@@ -51,7 +48,6 @@ export default function AQIGauge({ value, level }) {
       .style("fill", "#1f2937")
       .style("opacity", 0.3)
 
-    // Draw colored ranges
     ranges.forEach(range => {
       if (range.max <= 300) {
         const startAngle = angleScale(range.min)
@@ -68,7 +64,6 @@ export default function AQIGauge({ value, level }) {
       }
     })
 
-    // Draw needle
     const needleAngle = angleScale(Math.min(value, 300))
     const needleLength = radius - 15
     const needlePath = `M 0 -${needleLength} L 5 0 L 0 ${needleLength - 25} L -5 0 Z`

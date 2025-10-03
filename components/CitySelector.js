@@ -22,7 +22,8 @@ const AVAILABLE_CITIES = {
         heat: 85,
         floodRisk: 45,
         landUse: 72
-      }
+      },
+      hasNASAData: true
     },
     'Delhi': {
       name: 'Delhi',
@@ -107,36 +108,65 @@ export default function CitySelector({ onCitySelect }) {
   const [hoveredCity, setHoveredCity] = useState(null)
   const [cityData, setCityData] = useState(AVAILABLE_CITIES)
   
-  // Use NASA data for New York
-  const { data: nasaData, loading: nasaLoading, error: nasaError } = useNASAData('nyc', false)
+  // Use NASA data for New York and Mumbai for selector cards
+  const { data: nycData, loading: nycLoading, error: nycError } = useNASAData('nyc', false)
+  const { data: mumbaiData, loading: mumbaiLoading, error: mumbaiError } = useNASAData('mumbai', false)
 
-  // Update city data with NASA data when available
+  // Update NYC card with NASA data when available
   useEffect(() => {
-    if (nasaData && nasaData.currentAQI) {
+    if (nycData && nycData.currentAQI) {
       setCityData(prevData => ({
         ...prevData,
         'United States': {
           ...prevData['United States'],
           'New York': {
             ...prevData['United States']['New York'],
-            aqi: nasaData.currentAQI,
-            aqiLevel: nasaData.currentAQILevel,
-            description: `Global city with NASA satellite data available (${nasaData.totalDays} days processed)`,
+            aqi: nycData.currentAQI,
+            aqiLevel: nycData.currentAQILevel,
+            description: `Global city with NASA satellite data available (${nycData.totalDays} days processed)`,
             stats: {
               ...prevData['United States']['New York'].stats,
-              pollution: Math.min(100, Math.round((nasaData.currentAQI / 200) * 100)), // Convert AQI to percentage
+              pollution: Math.min(100, Math.round((nycData.currentAQI / 200) * 100)), // Convert AQI to percentage
             },
             nasaData: {
-              totalDays: nasaData.totalDays,
-              validDays: nasaData.validDays,
-              dataRange: nasaData.dataRange,
-              lastUpdated: nasaData.lastUpdated
+              totalDays: nycData.totalDays,
+              validDays: nycData.validDays,
+              dataRange: nycData.dataRange,
+              lastUpdated: nycData.lastUpdated
             }
           }
         }
       }))
     }
-  }, [nasaData])
+  }, [nycData])
+
+  // Update Mumbai card with NASA data when available
+  useEffect(() => {
+    if (mumbaiData && mumbaiData.currentAQI) {
+      setCityData(prevData => ({
+        ...prevData,
+        'India': {
+          ...prevData['India'],
+          'Mumbai': {
+            ...prevData['India']['Mumbai'],
+            aqi: mumbaiData.currentAQI,
+            aqiLevel: mumbaiData.currentAQILevel,
+            description: `Financial capital with NASA satellite data available (${mumbaiData.totalDays} days processed)`,
+            stats: {
+              ...prevData['India']['Mumbai'].stats,
+              pollution: Math.min(100, Math.round((mumbaiData.currentAQI / 200) * 100)),
+            },
+            nasaData: {
+              totalDays: mumbaiData.totalDays,
+              validDays: mumbaiData.validDays,
+              dataRange: mumbaiData.dataRange,
+              lastUpdated: mumbaiData.lastUpdated
+            }
+          }
+        }
+      }))
+    }
+  }, [mumbaiData])
 
   const handleCitySelect = (country, city) => {
     const selectedCityData = cityData[country][city]
@@ -262,7 +292,7 @@ export default function CitySelector({ onCitySelect }) {
                           {currentCityData.hasNASAData && (
                             <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs">
                               🛰️ NASA Data
-                              {nasaLoading && cityName === 'New York' && (
+                              {(cityName === 'New York' ? nycLoading : cityName === 'Mumbai' ? mumbaiLoading : false) && (
                                 <Loader2 className="h-3 w-3 ml-1 animate-spin" />
                               )}
                             </Badge>
@@ -273,11 +303,11 @@ export default function CitySelector({ onCitySelect }) {
                             className={`${getAQIColor(currentCityData.aqi)} text-white px-2 py-1 text-xs`}
                           >
                             AQI {currentCityData.aqi}
-                            {nasaLoading && cityName === 'New York' && (
+                          {(cityName === 'New York' ? nycLoading : cityName === 'Mumbai' ? mumbaiLoading : false) && (
                               <Loader2 className="h-3 w-3 ml-1 animate-spin" />
                             )}
                           </Badge>
-                          {cityName !== 'New York' && (
+                          {!(cityName === 'New York' || cityName === 'Mumbai') && (
                             <Badge variant="secondary" className="text-[10px] px-1 py-0">
                               Static
                             </Badge>
@@ -287,12 +317,22 @@ export default function CitySelector({ onCitySelect }) {
                       <p className="text-sm text-muted-foreground">
                         {currentCityData.description}
                       </p>
-                      {cityName === 'New York' && nasaError && (
+                      {cityName === 'New York' && nycError && (
                         <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded mt-2">
                           Using fallback data - NASA service unavailable
                         </div>
                       )}
                       {cityName === 'New York' && currentCityData.nasaData && (
+                        <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2">
+                          Real-time NASA data: {currentCityData.nasaData.totalDays} days processed
+                        </div>
+                      )}
+                      {cityName === 'Mumbai' && mumbaiError && (
+                        <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded mt-2">
+                          Using fallback data - NASA service unavailable
+                        </div>
+                      )}
+                      {cityName === 'Mumbai' && currentCityData.nasaData && (
                         <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded mt-2">
                           Real-time NASA data: {currentCityData.nasaData.totalDays} days processed
                         </div>
@@ -316,7 +356,7 @@ export default function CitySelector({ onCitySelect }) {
                       </div>
 
                       {/* Quick Stats */}
-                      {cityName === 'New York' ? (
+                      {cityName === 'New York' || cityName === 'Mumbai' ? (
                         <div className="grid grid-cols-2 gap-3 text-xs">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Pollution</span>

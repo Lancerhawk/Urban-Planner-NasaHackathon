@@ -44,6 +44,8 @@ const getAQILevel = (aqi) => {
 
 export default function CityInsights({ cityData, cities, selectedCountry, selectedCity, onCityChange }) {
   const [mounted, setMounted] = useState(false)
+  const hasNASAData = cityData?.name === 'New York' || cityData?.name === 'Mumbai'
+  const nasaCityKey = cityData?.name === 'New York' ? 'nyc' : (cityData?.name === 'Mumbai' ? 'mumbai' : null)
 
   useEffect(() => {
     setMounted(true)
@@ -76,7 +78,7 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                 <div className="flex items-center gap-3">
                   <h1 className="text-3xl font-bold">{cityData.name}</h1>
-                  {cityData.name === 'New York' && (
+                  {hasNASAData && (
                     <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
                       🛰️ NASA Data Available
                     </Badge>
@@ -146,14 +148,14 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 h-[27.3rem]">
-              <CityMap cityData={cityData} />
+              <CityMap cityData={cityData} mode="overview" />
             </CardContent>
           </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="h-[27rem] relative">
               <div className="absolute top-2 right-2 z-10">
-                {cityData.name === 'New York' ? (
+                {hasNASAData ? (
                   <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px]">Real data</Badge>
                 ) : (
                   <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
@@ -166,8 +168,8 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                 </CardTitle>
               </CardHeader>
               <CardContent className="h-[23rem] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full">
-                {cityData.name === 'New York' ? (
-                  <NASAPollutionChart city="nyc" />
+                {hasNASAData ? (
+                  <NASAPollutionChart city={nasaCityKey} />
                 ) : (
                   <PollutionChart data={cityData.pollutionTrend} />
                 )}
@@ -199,7 +201,7 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
         >
           <Card className="h-[31.3rem] relative">
             <div className="absolute top-2 right-2 z-10">
-              {cityData.name === 'New York' ? (
+              {hasNASAData ? (
                 <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px]">Real data</Badge>
               ) : (
                 <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
@@ -212,8 +214,8 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
               </CardTitle>
             </CardHeader>
             <CardContent className="h-[27.3rem] flex items-center justify-center px-2 pb-3 pt-0">
-              {cityData.name === 'New York' ? (
-                <NASAAQIGauge city="nyc" />
+              {hasNASAData ? (
+                <NASAAQIGauge city={nasaCityKey} />
               ) : (
                 <AQIGauge value={cityData.aqi} level={getAQILevel(cityData.aqi)} />
               )}

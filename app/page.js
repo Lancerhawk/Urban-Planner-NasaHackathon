@@ -224,7 +224,15 @@ export default function App() {
           />
         )
       case 'future':
-        return <FutureVision />
+        return (
+          <FutureVision 
+            cityData={currentCityData}
+            selectedCountry={selectedCountry}
+            selectedCity={selectedCity}
+            cities={MOCK_CITIES}
+            onCityChange={handleCityChange}
+          />
+        )
       case 'benchmarking':
         return <UrbanBenchmarking />
       default:

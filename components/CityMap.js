@@ -11,7 +11,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
 
-// Create NASA dataset icons
 const createNASADatasetIcon = (type, intensity, dataset) => {
   const colors = {
     pollution: intensity > 70 ? '#dc2626' : intensity > 40 ? '#f59e0b' : '#10b981',
@@ -104,7 +103,7 @@ const createCityCenterIcon = (aqi) => {
   })
 }
 
-export default function CityMap({ cityData }) {
+export default function CityMap({ cityData, mode = 'detailed' }) {
   const [map, setMap] = useState(null)
   const [mapKey, setMapKey] = useState(0)
   const mapRef = useRef(null)
@@ -135,17 +134,14 @@ export default function CityMap({ cityData }) {
     const config = datasetConfig[type]
     
     for (let i = 0; i < config.count; i++) {
-      // More realistic distribution patterns
       const angle = (i / config.count) * 2 * Math.PI
-      const distance = 0.02 + Math.random() * 0.08 // 2-10km radius
+      const distance = 0.02 + Math.random() * 0.08 
       const offsetLat = lat + Math.cos(angle) * distance
       const offsetLng = lng + Math.sin(angle) * distance
       
-      // Realistic intensity variations
       const variation = (Math.random() - 0.5) * 30
       const intensity = Math.max(10, Math.min(95, config.baseIntensity + variation))
       
-      // Select random dataset for this point
       const dataset = config.datasets[Math.floor(Math.random() * config.datasets.length)]
       
       points.push({
@@ -162,9 +158,9 @@ export default function CityMap({ cityData }) {
     return points
   }
 
-  const pollutionDataPoints = generateNASADatasetPoints(cityData.coordinates, 'pollution')
-  const heatDataPoints = generateNASADatasetPoints(cityData.coordinates, 'heat')
-  const floodDataPoints = generateNASADatasetPoints(cityData.coordinates, 'flood')
+  const pollutionDataPoints = mode === 'overview' ? [] : generateNASADatasetPoints(cityData.coordinates, 'pollution')
+  const heatDataPoints = mode === 'overview' ? [] : generateNASADatasetPoints(cityData.coordinates, 'heat')
+  const floodDataPoints = mode === 'overview' ? [] : generateNASADatasetPoints(cityData.coordinates, 'flood')
 
   useEffect(() => {
     return () => {
@@ -195,7 +191,7 @@ export default function CityMap({ cityData }) {
   }
 
   const getZoneRadius = (intensity) => {
-    return Math.max(800, intensity * 15) // 800m to 1.5km radius
+    return Math.max(800, intensity * 15)
   }
 
   return (
@@ -217,22 +213,38 @@ export default function CityMap({ cityData }) {
           attribution=""
         />
         
-        {/* City Center Marker */}
-        <Marker position={cityData.coordinates} icon={createCityCenterIcon(cityData.aqi)}>
-          <Popup>
-            <div className="p-3 min-w-[200px]">
-              <h3 className="font-bold text-lg mb-2">{cityData.name}</h3>
-              <div className="space-y-1">
-                <p className="text-sm"><span className="font-semibold">AQI:</span> {cityData.aqi}</p>
-                <p className="text-sm"><span className="font-semibold">Status:</span> {cityData.aqiLevel}</p>
-                <p className="text-sm"><span className="font-semibold">Country:</span> {cityData.country}</p>
+        {mode !== 'overview' ? (
+          <Marker position={cityData.coordinates} icon={createCityCenterIcon(cityData.aqi)}>
+            <Popup>
+              <div className="p-3 min-w-[200px]">
+                <h3 className="font-bold text-lg mb-2">{cityData.name}</h3>
+                <div className="space-y-1">
+                  <p className="text-sm"><span className="font-semibold">AQI:</span> {cityData.aqi}</p>
+                  <p className="text-sm"><span className="font-semibold">Status:</span> {cityData.aqiLevel}</p>
+                  <p className="text-sm"><span className="font-semibold">Country:</span> {cityData.country}</p>
+                </div>
               </div>
-            </div>
-          </Popup>
-        </Marker>
+            </Popup>
+          </Marker>
+        ) : (
+          // Draw a simple synthetic boundary ring for overview mode
+          (() => {
+            const [lat, lng] = cityData.coordinates
+            const ring = Array.from({ length: 24 }, (_, i) => {
+              const angle = (i / 24) * 2 * Math.PI
+              const r = 0.08 + (Math.sin(i) * 0.01)
+              return [lat + Math.cos(angle) * r, lng + Math.sin(angle) * r]
+            })
+            return (
+              <Polygon 
+                positions={ring}
+                pathOptions={{ color: '#3b82f6', weight: 3, fillOpacity: 0, dashArray: '6,6' }}
+              />
+            )
+          })()
+        )}
 
-        {/* NASA Air Quality Dataset Points */}
-        {pollutionDataPoints.map((dataPoint) => (
+        {mode !== 'overview' && pollutionDataPoints.map((dataPoint) => (
           <div key={dataPoint.id}>
             <Marker position={dataPoint.position} icon={createNASADatasetIcon(dataPoint.type, dataPoint.intensity, dataPoint.dataset)}>
               <Popup>
@@ -264,8 +276,7 @@ export default function CityMap({ cityData }) {
           </div>
         ))}
 
-        {/* NASA Urban Heat Island Dataset Points */}
-        {heatDataPoints.map((dataPoint) => (
+        {mode !== 'overview' && heatDataPoints.map((dataPoint) => (
           <div key={dataPoint.id}>
             <Marker position={dataPoint.position} icon={createNASADatasetIcon(dataPoint.type, dataPoint.intensity, dataPoint.dataset)}>
               <Popup>
@@ -297,8 +308,7 @@ export default function CityMap({ cityData }) {
           </div>
         ))}
 
-        {/* NASA Flood Risk Dataset Points */}
-        {floodDataPoints.map((dataPoint) => (
+        {mode !== 'overview' && floodDataPoints.map((dataPoint) => (
           <div key={dataPoint.id}>
             <Marker position={dataPoint.position} icon={createNASADatasetIcon(dataPoint.type, dataPoint.intensity, dataPoint.dataset)}>
               <Popup>

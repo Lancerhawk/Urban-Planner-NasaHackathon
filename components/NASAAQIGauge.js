@@ -210,7 +210,8 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
             className="mb-0"
             style={{ 
               backgroundColor: currentAQIColor,
-              color: 'white'
+              color: 'white',
+              fontWeight: 'bold'
             }}
           >
             {currentAQILevel}
