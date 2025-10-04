@@ -5,14 +5,24 @@ FROM node:18-alpine
 RUN apk add --no-cache \
     gdal \
     gdal-dev \
+    gdal-tools \
     python3 \
     py3-pip \
     build-base \
+    proj \
+    geos \
+    geos-dev \
     && rm -rf /var/cache/apk/*
 
 # Set GDAL environment variables
 ENV GDAL_DATA=/usr/share/gdal
 ENV PROJ_LIB=/usr/share/proj
+
+# Verify GDAL installation
+RUN gdalinfo --version && gdal_translate --version
+
+# Test GDAL paths
+RUN which gdalinfo && which gdal_translate
 
 # Set working directory
 WORKDIR /app
