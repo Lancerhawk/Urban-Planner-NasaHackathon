@@ -16,6 +16,7 @@ import NASAPollutionChart from '@/components/NASAPollutionChart'
 import LandUseChart from '@/components/LandUseChart'
 import UrbanExpansionChart from '@/components/UrbanExpansionChart'
 import QuickStats from '@/components/QuickStats'
+import { useNASAData } from '@/hooks/use-nasa-data'
 
 const CityMap = dynamic(() => import('@/components/CityMap'), { 
   ssr: false,
@@ -66,6 +67,9 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
   const hasNASAData = cityData?.name === 'New York' || cityData?.name === 'Mumbai'
   const nasaCityKey = cityData?.name === 'New York' ? 'nyc' : (cityData?.name === 'Mumbai' ? 'mumbai' : null)
   const availableAreas = CITY_AREAS[cityData?.name] || [{ id: 'citywide', name: 'Citywide Average', coordinates: null }]
+  
+  // Get loading state from NASA data hook
+  const { loading: nasaDataLoading } = useNASAData(nasaCityKey || 'nyc', hasNASAData, selectedArea)
 
   useEffect(() => {
     setMounted(true)
@@ -173,6 +177,7 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                         mode="overview" 
                         showHotspots={hasNASAData}
                         selectedArea={selectedArea}
+                        isLoading={nasaDataLoading}
                       />
                     </CardContent>
           </Card>
@@ -244,8 +249,8 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                   <span>Air Quality Index</span>
                 </div>
                 {hasNASAData && (
-                  <Select value={selectedArea} onValueChange={setSelectedArea}>
-                    <SelectTrigger className="w-[180px] h-8 text-xs">
+                  <Select value={selectedArea} onValueChange={setSelectedArea} disabled={nasaDataLoading}>
+                    <SelectTrigger className="w-[180px] h-8 text-xs" disabled={nasaDataLoading}>
                       <SelectValue placeholder="Select area" />
                     </SelectTrigger>
                     <SelectContent>

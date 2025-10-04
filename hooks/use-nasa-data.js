@@ -121,7 +121,7 @@ export function useNASAData(city = 'nyc', autoRefresh = true, area = 'citywide')
         setLastUpdated(new Date(cachedData.lastUpdated))
       }
     }
-  }, [city, area, getCachedData, setCachedData, data])
+  }, [city, area, getCachedData, setCachedData])
 
   // Manual refresh function
   const refresh = useCallback(() => {

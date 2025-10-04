@@ -160,7 +160,7 @@ const createCityCenterIcon = (aqi) => {
   })
 }
 
-export default function CityMap({ cityData, mode = 'detailed', showHotspots = false, selectedArea = 'citywide' }) {
+export default function CityMap({ cityData, mode = 'detailed', showHotspots = false, selectedArea = 'citywide', isLoading = false }) {
   const [map, setMap] = useState(null)
   const [mapKey, setMapKey] = useState(0)
   const mapRef = useRef(null)
@@ -344,16 +344,16 @@ export default function CityMap({ cityData, mode = 'detailed', showHotspots = fa
           variant="outline"
           size="sm"
           onClick={handleMapRefresh}
-          disabled={mapRefreshing || hotspotsLoading}
+          disabled={mapRefreshing || hotspotsLoading || isLoading}
           className="h-8 px-3 text-xs bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-background text-foreground hover:text-foreground disabled:opacity-50"
         >
-          <RefreshCw className={`h-3 w-3 mr-1 ${(mapRefreshing || hotspotsLoading) ? 'animate-spin' : ''}`} />
-          {mapRefreshing || hotspotsLoading ? 'Refreshing...' : 'Refresh Map'}
+          <RefreshCw className={`h-3 w-3 mr-1 ${(mapRefreshing || hotspotsLoading || isLoading) ? 'animate-spin' : ''}`} />
+          {mapRefreshing || hotspotsLoading || isLoading ? 'Refreshing...' : 'Refresh Map'}
         </Button>
       </div>
 
       {/* Loading Overlay */}
-      {(mapRefreshing || hotspotsLoading) && (
+      {(mapRefreshing || hotspotsLoading || isLoading) && (
         <div className="absolute inset-0 z-[999] bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-background/95 backdrop-blur-sm rounded-lg p-4 border shadow-lg">
             <div className="flex items-center gap-3">
@@ -361,7 +361,7 @@ export default function CityMap({ cityData, mode = 'detailed', showHotspots = fa
               <div className="text-sm">
                 <div className="font-medium">Updating Map Data</div>
                 <div className="text-muted-foreground text-xs">
-                  {hotspotsLoading ? 'Loading hotspots...' : 'Refreshing map...'}
+                  {isLoading ? 'Loading area data...' : hotspotsLoading ? 'Loading hotspots...' : 'Refreshing map...'}
                 </div>
               </div>
             </div>
