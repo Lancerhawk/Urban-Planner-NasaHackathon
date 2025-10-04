@@ -1,0 +1,101 @@
+<PAMDataset>
+  <Metadata>
+    <MDI key="ADDITIONALLAYERS">4</MDI>
+    <MDI key="add_offset">0</MDI>
+    <MDI key="ALGORITHMPACKAGEACCEPTANCEDATE">TBD</MDI>
+    <MDI key="ALGORITHMPACKAGEMATURITYCODE">Preliminary</MDI>
+    <MDI key="ALGORITHMPACKAGENAME">MOD_PR19</MDI>
+    <MDI key="ALGORITHMPACKAGEVERSION">2.0</MDI>
+    <MDI key="AREA_OR_POINT">Area</MDI>
+    <MDI key="ASSOCIATEDINSTRUMENTSHORTNAME.1">MODIS</MDI>
+    <MDI key="ASSOCIATEDINSTRUMENTSHORTNAME.2">MODIS</MDI>
+    <MDI key="ASSOCIATEDPLATFORMSHORTNAME.1">Terra</MDI>
+    <MDI key="ASSOCIATEDPLATFORMSHORTNAME.2">Aqua</MDI>
+    <MDI key="ASSOCIATEDSENSORSHORTNAME.1">MODIS</MDI>
+    <MDI key="ASSOCIATEDSENSORSHORTNAME.2">MODIS</MDI>
+    <MDI key="AUTOMATICQUALITYFLAG.1">Passed</MDI>
+    <MDI key="AUTOMATICQUALITYFLAGEXPLANATION.1">output file is created and good</MDI>
+    <MDI key="CHARACTERISTICBINANGULARSIZE">30.0</MDI>
+    <MDI key="CHARACTERISTICBINSIZE">926.625433055556</MDI>
+    <MDI key="DATACOLUMNS">1200</MDI>
+    <MDI key="DATAROWS">1200</MDI>
+    <MDI key="DAYNIGHTFLAG">Day</MDI>
+    <MDI key="DESCRREVISION">6.1</MDI>
+    <MDI key="EASTBOUNDINGCOORDINATE">74.5013122138774</MDI>
+    <MDI key="EQUATORCROSSINGDATE.1">2025-06-29</MDI>
+    <MDI key="EQUATORCROSSINGLONGITUDE.1">77.1506465928692</MDI>
+    <MDI key="EQUATORCROSSINGTIME.1">04:12:18.704904</MDI>
+    <MDI key="EXCLUSIONGRINGFLAG.1">N</MDI>
+    <MDI key="GEOANYABNORMAL">False</MDI>
+    <MDI key="GEOESTMAXRMSERROR">50.0</MDI>
+    <MDI key="GLOBALGRIDCOLUMNS">43200</MDI>
+    <MDI key="GLOBALGRIDROWS">21600</MDI>
+    <MDI key="GRANULEBEGINNINGDATETIME">2025-06-29T04:05:00.000000Z, 2025-06-29T05:40:00.000000Z, 2025-06-29T05:45:00.000000Z</MDI>
+    <MDI key="GRANULEDAYNIGHTFLAG">Day, Day, Day</MDI>
+    <MDI key="GRANULEENDINGDATETIME">2025-06-29T04:10:00.000000Z, 2025-06-29T05:45:00.000000Z, 2025-06-29T05:50:00.000000Z</MDI>
+    <MDI key="GRANULENUMBERARRAY">51, 70, 71, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1</MDI>
+    <MDI key="GRANULEPOINTERARRAY">0, 1, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1</MDI>
+    <MDI key="GRINGPOINTLATITUDE.1">9.96860597682666, 20.0181939291278, 19.9996209566023, 9.94962558583338</MDI>
+    <MDI key="GRINGPOINTLONGITUDE.1">60.698398839584, 63.6016289460673, 74.5041604285385, 71.0979500440738</MDI>
+    <MDI key="GRINGPOINTSEQUENCENO.1">1, 2, 3, 4</MDI>
+    <MDI key="HDFEOSVersion">HDFEOS_V2.19</MDI>
+    <MDI key="HORIZONTALTILENUMBER">24</MDI>
+    <MDI key="identifier_product_doi">10.5067/MODIS/MCD19A2.006</MDI>
+    <MDI key="identifier_product_doi_authority">https://doi.org</MDI>
+    <MDI key="INPUTPOINTER">MODMAIACO1km.A2025180.h24v07.061.2025181183330.hdf, MODMAIACOhkm.A2025180.h24v07.061.2025181183346.hdf, MODMAIACO1kmGEO.A2025180.h24v07.061.2025181183350.hdf, MYDMAIACO1km.A2025180.h24v07.061.2025181202350.hdf, MYDMAIACOhkm.A2025180.h24v07.061.2025181202359.hdf, MYDMAIACO1kmGEO.A2025180.h24v07.061.2025181202402.hdf, LUT_WV.bin, LUT_MODIS.0.bin, LUT_MODIS.1.bin, LUT_MODIS.2.bin, LUT_MODIS.3.bin, LUT_MODIS.4.bin, LUT_MODIS.5.bin, LUT_MODIS.6.bin, LUT_MODIS_MarC.0.bin, LUT_MODIS_MarC.2.bin, LUT_MODIS_MarF.0.bin, LUT_MODIS_MarF.1.1.bin, LUT_MODIS_MarF.1.2.bin, LUT_MODIS_MarF.1.3.bin, LUT_MODIS_MarF.2.bin, LUTsnow_R0.bin, MAIAC_AOTQA.txt, MAIAC_QAStatus.txt, LUT_MODIS.7.bin, LUT_MODIS.8.bin, DEM_SN.h24v07.005_0.hdf, AOTmodel.h24v07.hdf, MCD19QD01.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD02.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD03.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD04.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD05.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD06.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD07.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD08.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD09.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD10.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD11.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD12.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD13.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD14.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD15.61.2025179.h24v07.20250630230829.QueueDump, MCD19QD16.61.2025179.h24v07.20250630230829.QueueDump, MCD19TD01.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD02.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD03.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD04.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD05.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD06.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD07.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD08.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD09.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD10.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD11.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD12.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD13.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD14.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD15.61.2025179.h24v07.20250630230829.TileDump.tar, MCD19TD16.61.2025179.h24v07.20250630230829.TileDump.tar, gdas1.PGrbF00.250629.00z, gdas1.PGrbF00.250629.06z, gdas1.PGrbF00.250629.12z, gdas1.PGrbF00.250629.18z, gdas1.PGrbF00.250630.00z</MDI>
+    <MDI key="LOCALGRANULEID">MCD19A2.A2025180.h24v07.061.2025182041846.hdf</MDI>
+    <MDI key="LOCALVERSIONID">SCF V6.0.32</MDI>
+    <MDI key="LONGNAME">MODIS/Terra+Aqua Land Aerosol Optical Depth Daily L2G Global 1km SIN Grid</MDI>
+    <MDI key="long_name">AOD at 0.47 micron</MDI>
+    <MDI key="MAXIMUMLINEINDEX">2001, 2029, 1193, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1</MDI>
+    <MDI key="MAXIMUMOBSERVATIONS">5</MDI>
+    <MDI key="MAXIMUMSAMPLEINDEX">133, 1353, 1353, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1</MDI>
+    <MDI key="MINIMUMLINEINDEX">826, 1995, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1</MDI>
+    <MDI key="MINIMUMSAMPLEINDEX">0, 1312, 1202, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1</MDI>
+    <MDI key="NADIRDATARESOLUTION">1km</MDI>
+    <MDI key="NORTHBOUNDINGCOORDINATE">19.9999999982039</MDI>
+    <MDI key="NUMBEROFINPUTGRANULES">0</MDI>
+    <MDI key="NUMBEROFOVERLAPGRANULES">3</MDI>
+    <MDI key="ORBITNUMBER.1">135818</MDI>
+    <MDI key="ORBITNUMBERARRAY">135818, 135819, 135819, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1</MDI>
+    <MDI key="Orbit_amount">4</MDI>
+    <MDI key="Orbit_time_stamp">20251800405T  20251800545T  20251801050A  20251801055A  </MDI>
+    <MDI key="PARAMETERNAME.1">MODIS MAIAC file</MDI>
+    <MDI key="PGEVERSION">6.1.25</MDI>
+    <MDI key="PROCESSINGCENTER">GSFC</MDI>
+    <MDI key="PRODUCTIONDATETIME">2025-07-01T04:18:46.000Z</MDI>
+    <MDI key="QAPERCENTCLOUDCOVER.1">0</MDI>
+    <MDI key="QAPERCENTGOODQUALITY">0</MDI>
+    <MDI key="QAPERCENTINTERPOLATEDDATA.1">0</MDI>
+    <MDI key="QAPERCENTMISSINGDATA.1">0</MDI>
+    <MDI key="QAPERCENTOTHERQUALITY">100</MDI>
+    <MDI key="QAPERCENTOUTOFBOUNDSDATA.1">64</MDI>
+    <MDI key="RANGEBEGINNINGDATE">2025-06-29</MDI>
+    <MDI key="RANGEBEGINNINGTIME">04:05:00.000000</MDI>
+    <MDI key="RANGEENDINGDATE">2025-06-29</MDI>
+    <MDI key="RANGEENDINGTIME">05:50:00.000000</MDI>
+    <MDI key="REFERENCEORBITNUMBER">135818</MDI>
+    <MDI key="REPROCESSINGACTUAL">reprocessed</MDI>
+    <MDI key="REPROCESSINGPLANNED">further update is anticipated</MDI>
+    <MDI key="scale_factor">0.001</MDI>
+    <MDI key="SCIENCEQUALITYFLAG.1">Not Investigated</MDI>
+    <MDI key="SCIENCEQUALITYFLAGEXPLANATION.1">See http://landweb.nascom.nasa.gov/cgi-bin/QA_WWW/qaFlagPage.cgi?sat=Terra+Aqua&amp;ver=C6 for the product Science Quality status.</MDI>
+    <MDI key="SHORTNAME">MCD19A2</MDI>
+    <MDI key="SOUTHBOUNDINGCOORDINATE">9.99999999910196</MDI>
+    <MDI key="SPSOPARAMETERS">none</MDI>
+    <MDI key="TileID">51024007</MDI>
+    <MDI key="TOTALADDITIONALOBSERVATIONS">847524</MDI>
+    <MDI key="TOTALOBSERVATIONS">5857104</MDI>
+    <MDI key="unit">none</MDI>
+    <MDI key="valid_range">-100, 6000</MDI>
+    <MDI key="VERSIONID">61</MDI>
+    <MDI key="VERTICALTILENUMBER">07</MDI>
+    <MDI key="WESTBOUNDINGCOORDINATE">60.925596707505</MDI>
+    <MDI key="_FillValue">-28672</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <Description>AOD at 0.47 micron</Description>
+    <Scale>0.001</Scale>
+    <ColorInterp>Gray</ColorInterp>
+  </PAMRasterBand>
+</PAMDataset>

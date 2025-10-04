@@ -3,6 +3,10 @@
 import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle, Polygon } from 'react-leaflet'
 import L from 'leaflet'
+import { useHotspots } from '@/hooks/use-hotspots'
+import { Button } from '@/components/ui/button'
+import { RefreshCw, MapPin } from 'lucide-react'
+
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -10,6 +14,59 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 })
+
+const createHotspotIcon = (severity, rank) => {
+  // All hotspots are red with different intensities
+  const colors = {
+    critical: '#dc2626', // Bright red
+    high: '#ef4444',     // Red
+    moderate: '#f87171'  // Light red
+  }
+  
+  const color = colors[severity] || '#dc2626'
+  
+  return new L.divIcon({
+    className: 'hotspot-marker',
+    html: `
+      <div style="
+        background: linear-gradient(135deg, ${color}, ${color}dd);
+        border: 3px solid white;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        position: relative;
+      ">
+        ${rank}
+        <div style="
+          position: absolute;
+          bottom: -6px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: ${color};
+          color: white;
+          padding: 2px 6px;
+          border-radius: 8px;
+          font-size: 8px;
+          font-weight: bold;
+          white-space: nowrap;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        ">
+          🔥
+        </div>
+      </div>
+    `,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14]
+  })
+}
 
 const createNASADatasetIcon = (type, intensity, dataset) => {
   const colors = {
@@ -103,10 +160,39 @@ const createCityCenterIcon = (aqi) => {
   })
 }
 
-export default function CityMap({ cityData, mode = 'detailed' }) {
+export default function CityMap({ cityData, mode = 'detailed', showHotspots = false, selectedArea = 'citywide' }) {
   const [map, setMap] = useState(null)
   const [mapKey, setMapKey] = useState(0)
   const mapRef = useRef(null)
+  
+  // Get hotspots data if enabled
+  const nasaCityKey = cityData?.name === 'New York' ? 'nyc' : (cityData?.name === 'Mumbai' ? 'mumbai' : null)
+  const { hotspots, loading: hotspotsLoading, error: hotspotsError, refresh: refreshHotspots } = useHotspots(
+    nasaCityKey, 
+    selectedArea, 
+    10
+  )
+
+  // Map refresh functionality
+  const [mapRefreshing, setMapRefreshing] = useState(false)
+  
+  const handleMapRefresh = async () => {
+    setMapRefreshing(true)
+    try {
+      // Refresh hotspots data
+      if (showHotspots && refreshHotspots) {
+        await refreshHotspots()
+      }
+      
+      // Force map re-render
+      setMapKey(prev => prev + 1)
+      
+      // Small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    } finally {
+      setMapRefreshing(false)
+    }
+  }
 
   const generateNASADatasetPoints = (center, type) => {
     const points = []
@@ -175,6 +261,31 @@ export default function CityMap({ cityData, mode = 'detailed' }) {
     setMapKey(prev => prev + 1)
   }, [cityData.name])
 
+  // Auto-fit map to hotspots when they load
+  useEffect(() => {
+    if (map && showHotspots && hotspots && hotspots.length > 0) {
+      const lats = hotspots.map(h => h.lat)
+      const lngs = hotspots.map(h => h.lng)
+      
+      if (lats.length > 0 && lngs.length > 0) {
+        const bounds = [
+          [Math.min(...lats) - 0.01, Math.min(...lngs) - 0.01],
+          [Math.max(...lats) + 0.01, Math.max(...lngs) + 0.01]
+        ]
+        
+        // Fit map to show all hotspots with padding
+        map.fitBounds(bounds, { padding: [20, 20] })
+      }
+    }
+  }, [map, hotspots, showHotspots])
+
+  // Show loading when area changes
+  useEffect(() => {
+    if (showHotspots && hotspotsLoading) {
+      // Map will show loading overlay automatically
+    }
+  }, [selectedArea, showHotspots, hotspotsLoading])
+
   const getZoneColor = (type, intensity) => {
     const colors = {
       pollution: intensity > 70 ? '#dc2626' : intensity > 40 ? '#f59e0b' : '#10b981',
@@ -194,12 +305,74 @@ export default function CityMap({ cityData, mode = 'detailed' }) {
     return Math.max(800, intensity * 15)
   }
 
+  // Auto-zoom to fit hotspots if available, otherwise use default
+  const getMapBounds = () => {
+    if (showHotspots && hotspots && hotspots.length > 0) {
+      // Calculate bounds to fit all hotspots with some padding
+      const lats = hotspots.map(h => h.lat)
+      const lngs = hotspots.map(h => h.lng)
+      
+      const bounds = [
+        [Math.min(...lats) - 0.01, Math.min(...lngs) - 0.01], // Southwest
+        [Math.max(...lats) + 0.01, Math.max(...lngs) + 0.01]  // Northeast
+      ]
+      return bounds
+    }
+    return null
+  }
+
+  const mapBounds = getMapBounds()
+  const mapCenter = mapBounds ? 
+    [(mapBounds[0][0] + mapBounds[1][0]) / 2, (mapBounds[0][1] + mapBounds[1][1]) / 2] : 
+    cityData.coordinates
+  const mapZoom = mapBounds ? 11 : 11
+
   return (
-    <div className="h-full w-full rounded-lg overflow-hidden">
+    <div className="h-full w-full rounded-lg overflow-hidden relative">
+      {/* Map Controls */}
+      <div className="absolute top-2 right-2 z-[1000] flex flex-col gap-2">
+        {/* Area Indicator */}
+        {showHotspots && selectedArea !== 'citywide' && (
+          <div className="bg-background/95 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-1 text-xs font-medium shadow-lg text-foreground">
+            <MapPin className="h-3 w-3 inline mr-1" />
+            {selectedArea.charAt(0).toUpperCase() + selectedArea.slice(1)} Zone
+          </div>
+        )}
+        
+        {/* Refresh Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleMapRefresh}
+          disabled={mapRefreshing || hotspotsLoading}
+          className="h-8 px-3 text-xs bg-background/95 backdrop-blur-sm border-border/50 shadow-lg hover:bg-background text-foreground hover:text-foreground disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3 w-3 mr-1 ${(mapRefreshing || hotspotsLoading) ? 'animate-spin' : ''}`} />
+          {mapRefreshing || hotspotsLoading ? 'Refreshing...' : 'Refresh Map'}
+        </Button>
+      </div>
+
+      {/* Loading Overlay */}
+      {(mapRefreshing || hotspotsLoading) && (
+        <div className="absolute inset-0 z-[999] bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-background/95 backdrop-blur-sm rounded-lg p-4 border shadow-lg">
+            <div className="flex items-center gap-3">
+              <RefreshCw className="h-5 w-5 animate-spin text-primary" />
+              <div className="text-sm">
+                <div className="font-medium">Updating Map Data</div>
+                <div className="text-muted-foreground text-xs">
+                  {hotspotsLoading ? 'Loading hotspots...' : 'Refreshing map...'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MapContainer
         key={mapKey}
-        center={cityData.coordinates}
-        zoom={11}
+        center={mapCenter}
+        zoom={mapZoom}
         style={{ height: '100%', width: '100%' }}
         whenCreated={(mapInstance) => {
           setMap(mapInstance)
@@ -212,6 +385,7 @@ export default function CityMap({ cityData, mode = 'detailed' }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution=""
         />
+
         
         {mode !== 'overview' ? (
           <Marker position={cityData.coordinates} icon={createCityCenterIcon(cityData.aqi)}>
@@ -227,21 +401,19 @@ export default function CityMap({ cityData, mode = 'detailed' }) {
             </Popup>
           </Marker>
         ) : (
-          // Draw a simple synthetic boundary ring for overview mode
-          (() => {
-            const [lat, lng] = cityData.coordinates
-            const ring = Array.from({ length: 24 }, (_, i) => {
-              const angle = (i / 24) * 2 * Math.PI
-              const r = 0.08 + (Math.sin(i) * 0.01)
-              return [lat + Math.cos(angle) * r, lng + Math.sin(angle) * r]
-            })
-            return (
-              <Polygon 
-                positions={ring}
-                pathOptions={{ color: '#3b82f6', weight: 3, fillOpacity: 0, dashArray: '6,6' }}
-              />
-            )
-          })()
+          // In overview mode, show city center marker
+          <Marker position={cityData.coordinates} icon={createCityCenterIcon(cityData.aqi)}>
+            <Popup>
+              <div className="p-3 min-w-[200px]">
+                <h3 className="font-bold text-lg mb-2">{cityData.name}</h3>
+                <div className="space-y-1">
+                  <p className="text-sm"><span className="font-semibold">AQI:</span> {cityData.aqi}</p>
+                  <p className="text-sm"><span className="font-semibold">Status:</span> {cityData.aqiLevel}</p>
+                  <p className="text-sm"><span className="font-semibold">Country:</span> {cityData.country}</p>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
         )}
 
         {mode !== 'overview' && pollutionDataPoints.map((dataPoint) => (
@@ -336,6 +508,54 @@ export default function CityMap({ cityData, mode = 'detailed' }) {
               color={getZoneColor(dataPoint.type, dataPoint.intensity)}
               weight={2}
               opacity={0.8}
+            />
+          </div>
+        ))}
+
+        {/* Hotspots */}
+        {showHotspots && hotspots && hotspots.map((hotspot) => (
+          <div key={hotspot.id}>
+            <Marker 
+              position={[hotspot.lat, hotspot.lng]} 
+              icon={createHotspotIcon(hotspot.severity, hotspot.rank)}
+            >
+              <Popup>
+                <div className="p-3 min-w-[220px]">
+                  <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                    🔥 Pollution Hotspot #{hotspot.rank}
+                  </h3>
+                  <div className="space-y-1">
+                    <p className="text-sm"><span className="font-semibold">Severity:</span> 
+                      <span className={`ml-1 px-2 py-1 rounded text-xs font-medium ${
+                        hotspot.severity === 'critical' ? 'bg-red-100 text-red-800' :
+                        hotspot.severity === 'high' ? 'bg-orange-100 text-orange-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {hotspot.severity.toUpperCase()}
+                      </span>
+                    </p>
+                    <p className="text-sm"><span className="font-semibold">AQI:</span> {hotspot.aqi}</p>
+                    <p className="text-sm"><span className="font-semibold">AOD:</span> {hotspot.aod.toFixed(3)}</p>
+                    <p className="text-sm"><span className="font-semibold">Date:</span> {hotspot.date}</p>
+                    <div className="mt-2 p-2 bg-red-50 rounded text-xs text-red-700">
+                      ⚠️ High pollution area - 1km radius
+                    </div>
+                  </div>
+                </div>
+              </Popup>
+            </Marker>
+            <Circle
+              center={[hotspot.lat, hotspot.lng]}
+              radius={hotspot.radius}
+              pathOptions={{
+                color: hotspot.severity === 'critical' ? '#dc2626' : 
+                       hotspot.severity === 'high' ? '#ef4444' : '#f87171',
+                fillColor: hotspot.severity === 'critical' ? '#dc2626' : 
+                          hotspot.severity === 'high' ? '#ef4444' : '#f87171',
+                fillOpacity: 0.15,
+                weight: 2,
+                dashArray: '5,5'
+              }}
             />
           </div>
         ))}

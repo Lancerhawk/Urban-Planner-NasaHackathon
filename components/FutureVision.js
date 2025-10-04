@@ -40,6 +40,9 @@ const PlannerSiteMap = dynamic(() => import('@/components/PlannerSiteMap'), {
 export default function FutureVision({ cityData, selectedCountry, selectedCity, cities, onCityChange }) {
   const [mounted, setMounted] = useState(false)
   const [scenario, setScenario] = useState('baseline')
+  const [hasLand, setHasLand] = useState(false)
+  const [landCoordinates, setLandCoordinates] = useState('')
+  const [landName, setLandName] = useState('')
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -144,8 +147,8 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
               </div>
               <p className="text-muted-foreground">{cityData.name}, {cityData.country}</p>
             </div>
-          </div>
-
+        </div>
+        
           {/* City selectors like CityInsights */}
           {cities && onCityChange && (
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-1 lg:flex-initial lg:max-w-md">
@@ -195,7 +198,7 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
                   <span>Risk Scenario Map</span>
-                </CardTitle>
+              </CardTitle>
                 {/* Scenario selector moved into map card */}
                 <div className="flex gap-2 flex-wrap">
                   {[
@@ -232,7 +235,7 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
               </div>
             </CardContent>
           </Card>
-
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Pollution Forecast */}
             <Card className="h-[32.5rem] relative flex flex-col overflow-hidden">
@@ -243,8 +246,8 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
                 <CardTitle className="flex items-center gap-2">
                   <Wind className="h-5 w-5" />
                   <span>Air Pollution Forecast (AOD ➜ AQI)</span>
-                </CardTitle>
-              </CardHeader>
+              </CardTitle>
+            </CardHeader>
               <CardContent className="h-[27rem] p-0 flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full p-4">
                 <ChartContainer
@@ -272,9 +275,9 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
                   <input className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground/70" placeholder="Ask about AQI outlook, hotspots, or mitigation…" />
                   <button className="text-xs px-3 py-1 rounded-md border hover:bg-muted">Send</button>
                 </div>
-              </CardContent>
-            </Card>
-
+            </CardContent>
+          </Card>
+          
             {/* Heat Island Growth */}
             <Card className="h-[32.5rem] relative flex flex-col overflow-hidden">
               <div className="absolute top-2 right-2 z-10">
@@ -284,8 +287,8 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
                 <CardTitle className="flex items-center gap-2">
                   <ThermometerSun className="h-5 w-5" />
                   <span>Heat Island Growth (LST)</span>
-                </CardTitle>
-              </CardHeader>
+              </CardTitle>
+            </CardHeader>
               <CardContent className="h-[27rem] p-0 flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full p-4">
                 <ChartContainer
@@ -314,10 +317,10 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
                   <input className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground/70" placeholder="Ask about heat hotspots, priority wards, or cool roof policy…" />
                   <button className="text-xs px-3 py-1 rounded-md border hover:bg-muted">Send</button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </motion.div>
+            </CardContent>
+          </Card>
+        </div>
+      </motion.div>
 
         {/* Right: Briefing + Sprawl */}
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="space-y-6">
@@ -375,7 +378,7 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
               </div>
             </CardContent>
           </Card>
-
+          
           <Card className="relative flex flex-col">
             <div className="absolute top-2 right-2 z-10">
               <Badge variant="secondary" className="bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px]">Static</Badge>
@@ -469,9 +472,37 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Do you have land?</div>
                     <div className="flex items-center gap-3 text-xs">
-                      <label className="inline-flex items-center gap-1"><input name="hasLand" type="radio" defaultChecked /> Yes</label>
-                      <label className="inline-flex items-center gap-1"><input name="hasLand" type="radio" /> No</label>
+                      <label className="inline-flex items-center gap-1">
+                        <input name="hasLand" type="radio" checked={hasLand} onChange={() => setHasLand(true)} /> Yes
+                      </label>
+                      <label className="inline-flex items-center gap-1">
+                        <input name="hasLand" type="radio" checked={!hasLand} onChange={() => setHasLand(false)} /> No
+                      </label>
                     </div>
+                    {hasLand && (
+                      <div className="mt-2 space-y-2">
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-1">Land Name/Reference</div>
+                          <input 
+                            type="text" 
+                            className="w-full h-8 rounded-md border bg-background px-2 text-xs" 
+                            placeholder="e.g., Plot A-123, Sector 5"
+                            value={landName}
+                            onChange={(e) => setLandName(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <div className="text-xs text-muted-foreground mb-1">Coordinates (lat, lng)</div>
+                          <input 
+                            type="text" 
+                            className="w-full h-8 rounded-md border bg-background px-2 text-xs" 
+                            placeholder="e.g., 19.0760, 72.8777"
+                            value={landCoordinates}
+                            onChange={(e) => setLandCoordinates(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground mb-1">Preferred Zones</div>
@@ -491,16 +522,15 @@ export default function FutureVision({ cityData, selectedCountry, selectedCity, 
                   <button className="text-xs px-3 py-2 rounded-md border hover:bg-muted">Suggest Sites</button>
                   <button className="text-xs px-3 py-2 rounded-md border hover:bg-muted">Clear</button>
                 </div>
-                <div className="text-[11px] text-muted-foreground">Legend: <span className="inline-block align-middle w-3 h-3 rounded-full" style={{ background:'#10b981' }}></span> Suitable <span className="inline-block align-middle w-3 h-3 rounded-full ml-3" style={{ background:'#f59e0b' }}></span> Conditional <span className="inline-block align-middle w-3 h-3 rounded-full ml-3" style={{ background:'#ef4444' }}></span> Avoid</div>
               </div>
               <div className="lg:col-span-2 h-[22rem] lg:h-full">
-                <PlannerSiteMap cityData={cityData} />
+                <PlannerSiteMap cityData={cityData} hasLand={hasLand} landCoordinates={landCoordinates} landName={landName} />
               </div>
             </div>
             <div className="border-t border-border p-2 flex items-center gap-2">
               <input className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground/70" placeholder="Ask about available sites, approvals, or zoning fit…" />
               <button className="text-xs px-3 py-1 rounded-md border hover:bg-muted">Send</button>
-            </div>
+        </div>
           </CardContent>
         </Card>
       </motion.div>

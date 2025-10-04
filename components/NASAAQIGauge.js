@@ -25,7 +25,7 @@ function RefreshTimer({ getTimeUntilNextRefresh, onRefresh, loading }) {
   if (!timeLeft) return null
 
   return (
-    <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mb-3">
+    <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mb-0 pb-0">
       <div className="flex items-center gap-2 bg-muted/20 rounded-full px-3 py-1">
         <Clock className="h-3 w-3" />
         <span className="tabular-nums">
@@ -40,13 +40,13 @@ function RefreshTimer({ getTimeUntilNextRefresh, onRefresh, loading }) {
         className="h-7 px-3 text-[11px] rounded-full shadow-sm"
       >
         <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-        Refresh
+        {loading ? 'Processing...' : 'Refresh'}
       </Button>
     </div>
   )
 }
 
-export default function NASAAQIGauge({ city = 'nyc' }) {
+export default function NASAAQIGauge({ city = 'nyc', area = 'citywide' }) {
   const svgRef = useRef()
   const {
     currentAQI,
@@ -62,7 +62,7 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
     error,
     refresh,
     getTimeUntilNextRefresh
-  } = useNASAData(city, true)
+  } = useNASAData(city, true, area)
 
   useEffect(() => {
     if (!svgRef.current || !currentAQI) return
@@ -168,9 +168,24 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
 
   if (loading && !currentAQI) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
-        <p className="text-sm text-muted-foreground">Loading NASA data...</p>
+      <div className="flex flex-col items-center justify-center h-full px-4">
+        <div className="w-full max-w-xs mb-6">
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+            <span>Processing NASA Data</span>
+            <span>Loading...</span>
+          </div>
+          <div className="w-full bg-muted rounded-full h-2">
+            <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+          </div>
+          <div className="flex items-center justify-center mt-3 text-xs text-muted-foreground">
+            <Satellite className="h-3 w-3 mr-1 animate-spin" />
+            <span>Analyzing satellite imagery...</span>
+          </div>
+        </div>
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-1">Processing AOD data from NASA MODIS</p>
+          <p className="text-xs text-muted-foreground">This may take a few moments</p>
+        </div>
       </div>
     )
   }
@@ -199,9 +214,23 @@ export default function NASAAQIGauge({ city = 'nyc' }) {
         />
       </div>
 
-      <div className="flex-shrink-0 flex items-center justify-center py-0 w-full">
-        <svg ref={svgRef}></svg>
-      </div>
+      {loading && currentAQI ? (
+        <div className="flex-shrink-0 flex items-center justify-center py-0 w-full relative">
+          <svg ref={svgRef} className="opacity-50"></svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <RefreshCw className="h-3 w-3 animate-spin" />
+                <span>Updating data...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex-shrink-0 flex items-center justify-center py-0 w-full">
+          <svg ref={svgRef}></svg>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full px-3 md:px-4 mt-0 w-full">
         <div className="w-full space-y-3 pb-4">

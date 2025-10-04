@@ -42,10 +42,30 @@ const getAQILevel = (aqi) => {
   return 'Very Unhealthy'
 }
 
+// Zone definitions for different cities (4 diagonal zones only: NE, NW, SE, SW)
+const CITY_AREAS = {
+  'New York': [
+    { id: 'citywide', name: 'Citywide Average', coordinates: null },
+    { id: 'northeastern', name: 'Northeastern', coordinates: { lat: 40.85, lng: -73.775 } },
+    { id: 'northwestern', name: 'Northwestern', coordinates: { lat: 40.85, lng: -74.175 } },
+    { id: 'southeastern', name: 'Southeastern', coordinates: { lat: 40.55, lng: -73.775 } },
+    { id: 'southwestern', name: 'Southwestern', coordinates: { lat: 40.55, lng: -74.175 } }
+  ],
+  'Mumbai': [
+    { id: 'citywide', name: 'Citywide Average', coordinates: null },
+    { id: 'northeastern', name: 'Northeastern', coordinates: { lat: 19.175, lng: 73.0125 } },
+    { id: 'northwestern', name: 'Northwestern', coordinates: { lat: 19.175, lng: 72.8375 } },
+    { id: 'southeastern', name: 'Southeastern', coordinates: { lat: 18.925, lng: 73.0125 } },
+    { id: 'southwestern', name: 'Southwestern', coordinates: { lat: 18.925, lng: 72.8375 } }
+  ]
+}
+
 export default function CityInsights({ cityData, cities, selectedCountry, selectedCity, onCityChange }) {
   const [mounted, setMounted] = useState(false)
+  const [selectedArea, setSelectedArea] = useState('citywide')
   const hasNASAData = cityData?.name === 'New York' || cityData?.name === 'Mumbai'
   const nasaCityKey = cityData?.name === 'New York' ? 'nyc' : (cityData?.name === 'Mumbai' ? 'mumbai' : null)
+  const availableAreas = CITY_AREAS[cityData?.name] || [{ id: 'citywide', name: 'Citywide Average', coordinates: null }]
 
   useEffect(() => {
     setMounted(true)
@@ -147,9 +167,14 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                 <span>City Overview</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 h-[27.3rem]">
-              <CityMap cityData={cityData} mode="overview" />
-            </CardContent>
+                    <CardContent className="p-6 h-[27.3rem]">
+                      <CityMap 
+                        cityData={cityData} 
+                        mode="overview" 
+                        showHotspots={hasNASAData}
+                        selectedArea={selectedArea}
+                      />
+                    </CardContent>
           </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -165,11 +190,16 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
                 <CardTitle className="flex items-center space-x-2">
                   <Wind className="h-5 w-5" />
                   <span>Pollution Trend</span>
+                  {!hasNASAData && selectedArea !== 'citywide' && (
+                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                      {selectedArea.charAt(0).toUpperCase() + selectedArea.slice(1)} Zone
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="h-[23rem] overflow-y-auto scrollbar-thin scrollbar-track-muted/20 scrollbar-thumb-muted-foreground/30 hover:scrollbar-thumb-muted-foreground/50 scrollbar-thumb-rounded-full">
                 {hasNASAData ? (
-                  <NASAPollutionChart city={nasaCityKey} />
+                  <NASAPollutionChart city={nasaCityKey} area={selectedArea} />
                 ) : (
                   <PollutionChart data={cityData.pollutionTrend} />
                 )}
@@ -208,14 +238,30 @@ export default function CityInsights({ cityData, cities, selectedCountry, select
               )}
             </div>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Wind className="h-5 w-5" />
-                <span>Air Quality Index</span>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Wind className="h-5 w-5" />
+                  <span>Air Quality Index</span>
+                </div>
+                {hasNASAData && (
+                  <Select value={selectedArea} onValueChange={setSelectedArea}>
+                    <SelectTrigger className="w-[180px] h-8 text-xs">
+                      <SelectValue placeholder="Select area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableAreas.map((area) => (
+                        <SelectItem key={area.id} value={area.id} className="text-xs">
+                          {area.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="h-[27.3rem] flex items-center justify-center px-2 pb-3 pt-0">
+            <CardContent className="h-[26.4rem] flex items-center justify-center px-2 pb-3 pt-0">
               {hasNASAData ? (
-                <NASAAQIGauge city={nasaCityKey} />
+                <NASAAQIGauge city={nasaCityKey} area={selectedArea} />
               ) : (
                 <AQIGauge value={cityData.aqi} level={getAQILevel(cityData.aqi)} />
               )}

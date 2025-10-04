@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Area, Legend } from 'recharts'
 import { useNASAData } from '@/hooks/use-nasa-data'
 import { Badge } from '@/components/ui/badge'
-import { Satellite, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Satellite, TrendingUp, TrendingDown, Minus, RefreshCw, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 function CustomTooltip({ active, payload, label }) {
@@ -28,6 +28,45 @@ function CustomTooltip({ active, payload, label }) {
     )
   }
   return null
+}
+
+function RefreshTimer({ getTimeUntilNextRefresh, onRefresh, loading }) {
+  const [timeLeft, setTimeLeft] = useState(null)
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const time = getTimeUntilNextRefresh()
+      setTimeLeft(time)
+    }
+
+    updateTimer()
+    const interval = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(interval)
+  }, [getTimeUntilNextRefresh])
+
+  if (!timeLeft) return null
+
+  return (
+    <div className="flex items-center justify-center gap-3 text-xs text-muted-foreground mb-2">
+      <div className="flex items-center gap-2 bg-muted/20 rounded-full px-3 py-1">
+        <Clock className="h-3 w-3" />
+        <span className="tabular-nums">
+          Next refresh: {timeLeft.minutes}m {timeLeft.seconds}s
+        </span>
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onRefresh}
+        disabled={loading}
+        className="h-7 px-3 text-[11px] rounded-full shadow-sm"
+      >
+        <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+        {loading ? 'Processing...' : 'Refresh'}
+      </Button>
+    </div>
+  )
 }
 
 function TrendIndicator({ trend, value }) {
@@ -55,15 +94,17 @@ function TrendIndicator({ trend, value }) {
   }
 }
 
-export default function NASAPollutionChart({ city = 'nyc' }) {
+export default function NASAPollutionChart({ city = 'nyc', area = 'citywide' }) {
   const {
     trend,
     statistics,
     loading,
     error,
     dataSource,
-    totalDays
-  } = useNASAData(city, true)
+    totalDays,
+    refresh,
+    getTimeUntilNextRefresh
+  } = useNASAData(city, true, area)
 
   const [trendAnalysis, setTrendAnalysis] = useState(null)
   const [xDomain, setXDomain] = useState(null)
@@ -161,10 +202,23 @@ export default function NASAPollutionChart({ city = 'nyc' }) {
 
   if (loading && !trend) {
     return (
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full flex flex-col items-center justify-center px-4">
+        <div className="w-full max-w-xs mb-6">
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+            <span>Processing NASA Data</span>
+            <span>Loading...</span>
+          </div>
+          <div className="w-full bg-muted rounded-full h-2">
+            <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+          </div>
+          <div className="flex items-center justify-center mt-3 text-xs text-muted-foreground">
+            <Satellite className="h-3 w-3 mr-1 animate-spin" />
+            <span>Analyzing satellite imagery...</span>
+          </div>
+        </div>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p className="text-sm text-muted-foreground">Loading NASA pollution data...</p>
+          <p className="text-sm text-muted-foreground mb-1">Processing AOD data from NASA MODIS</p>
+          <p className="text-xs text-muted-foreground">This may take a few moments</p>
         </div>
       </div>
     )
@@ -208,12 +262,26 @@ export default function NASAPollutionChart({ city = 'nyc' }) {
 
   return (
     <div className="h-full flex flex-col">
+      {/* Refresh Timer */}
+      <div className="flex-shrink-0">
+        <RefreshTimer 
+          getTimeUntilNextRefresh={getTimeUntilNextRefresh}
+          onRefresh={refresh}
+          loading={loading}
+        />
+      </div>
+
       {/* Header */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Satellite className="h-4 w-4 text-blue-500" />
             <span className="text-sm font-medium">NASA Pollution Trend</span>
+            {area !== 'citywide' && (
+              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                {area.charAt(0).toUpperCase() + area.slice(1)} Zone
+              </Badge>
+            )}
           </div>
           <Badge variant="secondary" className="text-xs">
             {totalDays} days
@@ -234,7 +302,17 @@ export default function NASAPollutionChart({ city = 'nyc' }) {
       </div>
 
       {/* Chart */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 relative">
+        {loading && trend && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="bg-background/80 backdrop-blur-sm rounded-lg p-3 border">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <RefreshCw className="h-3 w-3 animate-spin" />
+                <span>Updating data...</span>
+              </div>
+            </div>
+          </div>
+        )}
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             key={(xDomain ?? []).join('-')}

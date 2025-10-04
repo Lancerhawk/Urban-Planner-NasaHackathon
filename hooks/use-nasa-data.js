@@ -4,7 +4,7 @@ const REFRESH_INTERVAL = 10 * 60 * 1000 // 10 minutes in milliseconds
 const CACHE_KEY = 'nasa-data-cache'
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes cache
 
-export function useNASAData(city = 'nyc', autoRefresh = true) {
+export function useNASAData(city = 'nyc', autoRefresh = true, area = 'citywide') {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -17,7 +17,7 @@ export function useNASAData(city = 'nyc', autoRefresh = true) {
   // Check cache first
   const getCachedData = useCallback(() => {
     try {
-      const cached = localStorage.getItem(`${CACHE_KEY}-${city}`)
+      const cached = localStorage.getItem(`${CACHE_KEY}-${city}-${area}`)
       if (cached) {
         const { data: cachedData, timestamp } = JSON.parse(cached)
         const age = Date.now() - timestamp
@@ -30,19 +30,19 @@ export function useNASAData(city = 'nyc', autoRefresh = true) {
       console.warn('Error reading cache:', error)
     }
     return null
-  }, [city])
+  }, [city, area])
 
   // Save to cache
   const setCachedData = useCallback((data) => {
     try {
-      localStorage.setItem(`${CACHE_KEY}-${city}`, JSON.stringify({
+      localStorage.setItem(`${CACHE_KEY}-${city}-${area}`, JSON.stringify({
         data,
         timestamp: Date.now()
       }))
     } catch (error) {
       console.warn('Error saving to cache:', error)
     }
-  }, [city])
+  }, [city, area])
 
   // Fetch NASA data
   const fetchData = useCallback(async (forceRefresh = false) => {
@@ -71,8 +71,8 @@ export function useNASAData(city = 'nyc', autoRefresh = true) {
       abortControllerRef.current = new AbortController()
       
       const url = forceRefresh 
-        ? `/api/nasa-data?city=${city}&refresh=true`
-        : `/api/nasa-data?city=${city}`
+        ? `/api/nasa-data?city=${city}&area=${area}&refresh=true`
+        : `/api/nasa-data?city=${city}&area=${area}`
       
       const response = await fetch(url, {
         signal: abortControllerRef.current.signal,
@@ -121,7 +121,7 @@ export function useNASAData(city = 'nyc', autoRefresh = true) {
         setLastUpdated(new Date(cachedData.lastUpdated))
       }
     }
-  }, [city, getCachedData, setCachedData, data])
+  }, [city, area, getCachedData, setCachedData, data])
 
   // Manual refresh function
   const refresh = useCallback(() => {
