@@ -28,8 +28,11 @@
 ### What the Dockerfile does:
 - Uses Node.js 18 Alpine (lightweight Linux)
 - Installs GDAL and dependencies
+- Installs all npm dependencies (including dev dependencies for build)
+- Builds the Next.js application
+- Removes dev dependencies to reduce final image size
 - Sets up proper environment variables
-- Builds and runs your Next.js app
+- Runs your Next.js app
 
 ## 🔧 Alternative: Manual Docker Build
 
